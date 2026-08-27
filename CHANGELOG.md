@@ -51,7 +51,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   awaited rather than left as an un-awaited coroutine.
 - **`shutdown()` never ran under WSGI.** With no lifespan protocol, a gunicorn
   worker exiting skipped every `on_event("shutdown")` hook and left the
-  container's singletons undisposed. The adapter now registers an `atexit` hook.
+  container's singletons undisposed. The adapter now registers an `atexit`
+  hook *and* a chained `SIGTERM`/`SIGINT` handler — Python's default signal
+  handler terminates the process without running `atexit`, so a worker signalled
+  directly would still have skipped teardown. Verified against a live gunicorn
+  worker, both through the arbiter and signalled directly.
+- **`X | None` was not recognised on Python 3.10–3.13.** The union branch tested
+  `hasattr(t, "UnionType")`, but `UnionType` lives in `types`, not `typing`, so
+  the check was always false. `types.UnionType is typing.Union` only on 3.14,
+  which is why local runs passed. An optional nested model reached the handler
+  as a raw dict on every other supported version.
 - **File uploads leaked their temporary file on the loop-free path.**
   `UploadFile.close()` went through `run_in_threadpool`, which raises
   `RuntimeError: no running event loop` when there is no loop; cleanup failed

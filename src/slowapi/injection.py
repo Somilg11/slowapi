@@ -21,7 +21,6 @@ Inference is deliberately unsurprising:
 from __future__ import annotations
 
 import inspect
-import types
 import typing as t
 from dataclasses import dataclass, field
 
@@ -46,7 +45,7 @@ from .params import (
 )
 from .request import Request
 from .response import Response
-from .validation import FieldError, coerce, validate_param
+from .validation import FieldError, coerce, is_union, validate_param
 
 __all__ = ["HandlerSignature", "ParamSpec", "analyse"]
 
@@ -125,7 +124,7 @@ def _strip_optional(annotation: t.Any) -> t.Any:
     instead.
     """
     origin = t.get_origin(annotation)
-    if origin is not t.Union and origin is not types.UnionType:
+    if not is_union(origin):
         return annotation
     args = [arg for arg in t.get_args(annotation) if arg is not type(None)]
     return args[0] if len(args) == 1 else annotation

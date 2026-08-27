@@ -10,6 +10,8 @@ stepped to completion in the calling thread with no event loop involved at all
 from __future__ import annotations
 
 import atexit
+import os
+import signal
 import typing as t
 
 from ..concurrency import call_maybe_sync, drive, run_coroutine_sync
@@ -106,18 +108,70 @@ class WSGIAdapter:
         self._register_atexit()
 
     def _register_atexit(self) -> None:
+        """Arrange for shutdown to run however this process is stopped.
+
+        Two mechanisms, because neither covers the other's case:
+
+        ``atexit``
+            Fires on a clean interpreter exit.  This is the usual path -- a
+            scheduler signals the gunicorn arbiter, the arbiter stops its
+            workers with ``sys.exit()``, and ``atexit`` runs.
+
+        A ``SIGTERM``/``SIGINT`` handler
+            Python's default ``SIGTERM`` handler terminates the process without
+            running ``atexit`` at all.  Anything that signals a *worker*
+            directly -- a supervisor reaping a stuck one, a stray ``pkill`` --
+            would otherwise skip every shutdown hook.
+
+        The signal handler runs after the previous one, so a server's own
+        graceful drain still happens first and the container is not disposed
+        out from under an in-flight request.  ``shutdown()`` is idempotent, so
+        both mechanisms firing is harmless.
+        """
         if self.app._atexit_registered:
             return
         self.app._atexit_registered = True
         atexit.register(self._run_shutdown)
+        self._install_signal_handlers()
+
+    def _install_signal_handlers(self) -> None:
+        for signum in (signal.SIGTERM, signal.SIGINT):
+            try:
+                previous = signal.getsignal(signum)
+                signal.signal(signum, self._make_handler(signum, previous))
+            except (ValueError, OSError, RuntimeError):
+                # Not the main thread, or a platform without this signal.  The
+                # atexit hook still covers the clean-exit path.
+                return
+
+    def _make_handler(self, signum: int, previous: t.Any) -> t.Callable[..., None]:
+        def handler(received: int, frame: t.Any) -> None:
+            # Delegate first: the server drains in-flight requests here, and
+            # may not return at all if it exits from inside its own handler --
+            # in which case atexit picks the shutdown up.
+            try:
+                if callable(previous):
+                    previous(received, frame)
+            finally:
+                self._run_shutdown()
+            if previous is signal.SIG_DFL:
+                signal.signal(signum, signal.SIG_DFL)
+                os.kill(os.getpid(), signum)
+
+        return handler
 
     def _run_shutdown(self) -> None:
-        """Interpreter-exit hook.  Must never raise: atexit prints and moves on."""
+        """Run the application's shutdown once.  Must never raise.
+
+        Called from an ``atexit`` hook and from a signal handler, so raising
+        here would replace whatever exit was already under way with a confusing
+        one.
+        """
         if not self.app._started:
             return
         try:
             call_maybe_sync(self.app.shutdown)
-        except Exception:  # pragma: no cover - best effort at interpreter exit
+        except Exception:  # pragma: no cover - best effort at process exit
             self.app.logger.exception("shutdown hook failed")
 
     def _choose_executor(self, request: Request) -> bool:

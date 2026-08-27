@@ -197,3 +197,90 @@ class TestNeverSuspends:
 
         with pytest.raises(RuntimeError, match="fully synchronous"):
             TestClient(app, protocol="wsgi").get("/x")
+
+
+class TestSignalShutdown:
+    """``atexit`` alone is not enough: Python's default SIGTERM handler
+    terminates the process without running it, so anything that signals a
+    worker directly would skip every shutdown hook.  Verified against a real
+    gunicorn worker, not only here."""
+
+    def test_a_sigterm_handler_is_installed_and_chains(self):
+        import signal
+
+        events: list[str] = []
+        original_called: list[int] = []
+
+        def original(signum, frame):
+            original_called.append(signum)
+
+        app = SlowAPI()
+
+        @app.get("/x")
+        def handler(res: Response):
+            return res.json({})
+
+        @app.on_event("shutdown")
+        def bye() -> None:
+            events.append("shutdown")
+
+        previous = signal.getsignal(signal.SIGTERM)
+        signal.signal(signal.SIGTERM, original)
+        try:
+            TestClient(app, protocol="wsgi").get("/x")
+            installed = signal.getsignal(signal.SIGTERM)
+            assert installed is not original, "adapter did not install a handler"
+
+            installed(signal.SIGTERM, None)
+
+            # The server's own handler runs first, so an in-flight request is
+            # drained before the container is disposed.
+            assert original_called == [signal.SIGTERM]
+            assert events == ["shutdown"]
+        finally:
+            signal.signal(signal.SIGTERM, previous)
+
+    def test_shutdown_runs_only_once_across_both_mechanisms(self):
+        """The signal handler and the atexit hook can both fire."""
+        events: list[str] = []
+        app = SlowAPI()
+
+        @app.get("/x")
+        def handler(res: Response):
+            return res.json({})
+
+        @app.on_event("shutdown")
+        def bye() -> None:
+            events.append("shutdown")
+
+        adapter = WSGIAdapter(app)
+        TestClient(app, protocol="wsgi").get("/x")
+
+        adapter._run_shutdown()
+        adapter._run_shutdown()
+
+        assert events == ["shutdown"]
+
+    def test_installation_is_skipped_off_the_main_thread(self):
+        """``signal.signal`` raises there; the atexit hook still covers exit."""
+        import threading
+
+        app = SlowAPI()
+
+        @app.get("/x")
+        def handler(res: Response):
+            return res.json({})
+
+        errors: list[BaseException] = []
+
+        def serve() -> None:
+            try:
+                TestClient(app, protocol="wsgi").get("/x")
+            except BaseException as exc:
+                errors.append(exc)
+
+        thread = threading.Thread(target=serve)
+        thread.start()
+        thread.join()
+
+        assert not errors

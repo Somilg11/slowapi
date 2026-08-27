@@ -22,6 +22,7 @@ import enum
 import inspect
 import ipaddress
 import re
+import types
 import typing as t
 import uuid as _uuid
 from datetime import date, datetime, time, timedelta, timezone
@@ -56,6 +57,17 @@ class FieldError(Exception):
 
 
 # --------------------------------------------------------------------- probes
+
+
+def is_union(origin: t.Any) -> bool:
+    """True for ``Union[...]`` and for the ``X | Y`` form.
+
+    These are the same object on Python 3.14 and two different ones before it,
+    so both have to be named.  Checking only one silently skipped every
+    ``X | None`` annotation on 3.10 through 3.13 -- an optional nested model was
+    handed to the handler as a raw dict rather than the model it declared.
+    """
+    return origin is t.Union or origin is types.UnionType
 
 
 def _is_pydantic(annotation: t.Any) -> bool:
@@ -146,9 +158,7 @@ def coerce(value: t.Any, annotation: t.Any, loc: tuple[str, ...] = ()) -> t.Any:
     args = t.get_args(annotation)
 
     # Optional[X] / Union[...]
-    if origin is t.Union or (
-        hasattr(t, "UnionType") and isinstance(annotation, getattr(t, "UnionType", ()))
-    ):
+    if is_union(origin):
         if value is None and NoneType in args:
             return None
         errors: list[str] = []
@@ -355,9 +365,7 @@ def json_schema_for(
     origin = t.get_origin(annotation)
     args = t.get_args(annotation)
 
-    if origin is t.Union or (
-        hasattr(t, "UnionType") and isinstance(annotation, getattr(t, "UnionType", ()))
-    ):
+    if is_union(origin):
         variants = [json_schema_for(a, components) for a in args]
         if len(variants) == 2 and {"type": "null"} in variants:
             other = next(v for v in variants if v != {"type": "null"})
