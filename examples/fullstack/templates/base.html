@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Notes{% endblock %}</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <header>
+    <h1><a href="/">Notes</a></h1>
+    <p class="muted">Server-rendered with SlowAPI. No build step.</p>
+  </header>
+
+  {% for category, message in flashes %}
+    <p class="flash flash-{{ category }}">{{ message }}</p>
+  {% endfor %}
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="muted">{{ count }} note{% if count != 1 %}s{% endif %}</footer>
+</body>
+</html>

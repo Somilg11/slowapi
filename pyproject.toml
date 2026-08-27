@@ -1,0 +1,145 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "slowapi-framework"
+dynamic = ["version"]
+description = "One handler, two protocols. Express ergonomics, FastAPI typing, NestJS structure - on WSGI and ASGI at the same time."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+keywords = [
+    "web", "framework", "wsgi", "asgi", "api", "rest",
+    "dependency-injection", "openapi", "express", "fastapi", "nestjs",
+]
+authors = [{ name = "SlowAPI contributors" }]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
+    "Framework :: AsyncIO",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Typing :: Typed",
+]
+
+# The runtime has zero required dependencies. That is a design constraint, not
+# an accident: it keeps the install small, the audit surface tiny, and the
+# supply chain short. Everything below is opt-in.
+dependencies = []
+
+[project.optional-dependencies]
+asgi = ["uvicorn[standard]>=0.30"]
+wsgi = ["gunicorn>=22.0"]
+templates = ["jinja2>=3.1"]
+pydantic = ["pydantic>=2.7"]
+all = ["uvicorn[standard]>=0.30", "gunicorn>=22.0", "jinja2>=3.1", "pydantic>=2.7"]
+dev = [
+    "pytest>=8.2",
+    "pytest-cov>=5.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.5",
+    "mypy>=1.10",
+    "uvicorn[standard]>=0.30",
+    "gunicorn>=22.0",
+    "httpx>=0.27",
+]
+
+[project.scripts]
+slowapi = "slowapi.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/slowapi/slowapi"
+Documentation = "https://github.com/slowapi/slowapi/tree/main/docs"
+Source = "https://github.com/slowapi/slowapi"
+Issues = "https://github.com/slowapi/slowapi/issues"
+Changelog = "https://github.com/slowapi/slowapi/blob/main/CHANGELOG.md"
+
+[tool.hatch.version]
+path = "src/slowapi/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/slowapi"]
+
+[tool.hatch.build.targets.sdist]
+include = ["/src", "/tests", "/docs", "/examples", "/README.md", "/LICENSE", "/CHANGELOG.md"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --strict-config"
+filterwarnings = ["error"]
+markers = [
+    "slow: tests that take more than a second",
+    "benchmark: performance measurements, excluded from the default run",
+]
+
+[tool.coverage.run]
+source = ["src/slowapi"]
+branch = true
+omit = ["src/slowapi/__main__.py", "src/slowapi/scaffold.py"]
+
+[tool.coverage.report]
+precision = 1
+show_missing = true
+skip_covered = true
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if t.TYPE_CHECKING:",
+    "if TYPE_CHECKING:",
+    "\\.\\.\\.$",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",    # pycodestyle
+    "F",         # pyflakes
+    "I",         # isort
+    "B",         # bugbear
+    "C4",        # comprehensions
+    "UP",        # pyupgrade
+    "S",         # bandit
+    "RUF",       # ruff-specific
+]
+ignore = [
+    "E501",    # line length is handled by the formatter
+    "B008",    # function calls in defaults are the whole point of Query()/Depends()
+    "S101",    # asserts are fine in this codebase
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S", "B011"]
+"examples/*" = ["S", "B"]
+"src/slowapi/templating.py" = ["S307"]  # eval is documented and scoped
+
+[tool.mypy]
+python_version = "3.10"
+files = ["src/slowapi"]
+strict = false
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+no_implicit_optional = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+show_error_codes = true
+pretty = true
+
+[[tool.mypy.overrides]]
+module = ["uvicorn.*", "gunicorn.*", "jinja2.*"]
+ignore_missing_imports = true

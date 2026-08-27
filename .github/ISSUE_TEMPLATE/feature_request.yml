@@ -1,0 +1,38 @@
+name: Feature request
+description: Propose something SlowAPI should be able to do
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: |
+        Describe the situation, not the solution. What are you trying to build,
+        and where does the framework get in the way today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like
+      description: Sketch the API you wish existed.
+      render: python
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you tried instead
+      description: Workarounds, other frameworks, why they were not enough.
+
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Constraints this proposal respects
+      description: See docs/growth.md for why these exist.
+      options:
+        - label: Works identically under WSGI and ASGI
+        - label: Adds no required runtime dependency
+        - label: Is opt-in - existing applications keep working unchanged

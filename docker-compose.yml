@@ -1,0 +1,89 @@
+# Local development stack.
+#
+#   docker compose up            -> app on http://localhost:8000
+#   docker compose --profile wsgi up    -> the same app served over WSGI
+#
+# The two app services run identical code through different protocols, which is
+# the quickest way to see the dual-protocol claim hold up.
+
+services:
+  api:
+    build:
+      context: .
+      target: runtime
+    image: slowapi/example-api:dev
+    command: >
+      python -m slowapi run main:app
+      --host 0.0.0.0 --port 8000 --server uvicorn --reload
+    environment:
+      ENVIRONMENT: development
+      DEBUG: "true"
+      LOG_LEVEL: DEBUG
+      DATABASE_URL: postgresql://slowapi:slowapi@postgres:5432/slowapi
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: development-only-secret-change-me
+    ports:
+      - "8000:8000"
+    volumes:
+      # Bind-mount the source so --reload picks up edits without a rebuild.
+      - ./src:/opt/venv/lib/python3.12/site-packages/slowapi_src:ro
+      - ./examples/rest-api:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  api-wsgi:
+    profiles: ["wsgi"]
+    build:
+      context: .
+      target: runtime
+    image: slowapi/example-api:dev
+    command: >
+      gunicorn main:app
+      --bind 0.0.0.0:8000 --workers 4 --access-logfile -
+    environment:
+      ENVIRONMENT: development
+      SECRET_KEY: development-only-secret-change-me
+    ports:
+      - "8001:8000"
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: slowapi
+      POSTGRES_PASSWORD: slowapi
+      POSTGRES_DB: slowapi
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U slowapi"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres-data:

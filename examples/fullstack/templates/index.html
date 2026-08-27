@@ -1,0 +1,25 @@
+{% extends "base" %}
+
+{% block content %}
+<form method="post" action="/notes" class="composer">
+  <label for="body">New note</label>
+  <textarea id="body" name="body" rows="3" placeholder="Write something..."></textarea>
+  <button type="submit">Save</button>
+</form>
+
+{% if notes %}
+<ul class="notes">
+  {% for note in notes %}
+  <li>
+    <!-- Escaped automatically: a note containing <script> renders as text. -->
+    <p>{{ note.body }}</p>
+    <form method="post" action="/notes/{{ note.id }}/delete">
+      <button type="submit" class="link">Delete</button>
+    </form>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="muted">Nothing here yet.</p>
+{% endif %}
+{% endblock %}

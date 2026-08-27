@@ -1,0 +1,10 @@
+# Default owners for everything.
+*                           @slowapi/maintainers
+
+# The dual-protocol core is the part most easily broken by an innocent change.
+/src/slowapi/adapters/      @slowapi/core
+/src/slowapi/concurrency.py @slowapi/core
+/src/slowapi/app.py         @slowapi/core
+
+/.github/workflows/         @slowapi/maintainers
+/docs/                      @slowapi/docs
