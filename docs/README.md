@@ -34,6 +34,7 @@ Read in this order the first time.
 | [Templates and static files](guide/templates-static.md) | Server-rendered pages |
 | [Errors](guide/errors.md) | Exception handling and what clients are told |
 | [Configuration](guide/configuration.md) | Typed settings from the environment |
+| [Background, health, deadlines](guide/background-and-health.md) | Deferred work, liveness and readiness, request timeouts |
 | [Testing](guide/testing.md) | The dual-protocol test client |
 | [Security](guide/security.md) | What is on by default, and what is not |
 | [Deployment](guide/deployment.md) | Choosing a server, Docker, workers, health |

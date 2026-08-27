@@ -77,6 +77,40 @@ You can register both in one chain. SlowAPI figures out the rest:
 You are never asked to declare which mode you are in. See
 [Dual-protocol dispatch](../internals/dual-protocol.md).
 
+## Keeping the fast path
+
+That first rule is stricter than it needs to be. Being `async def` is not the
+same as being able to *suspend*: middleware that awaits nothing except
+`call_next()` cannot suspend on its own, so it is transparent to the loop-free
+path. SlowAPI assumes the worst by default, because assuming the worst is safe.
+
+`@never_suspends` lets you say otherwise:
+
+```python
+from slowapi import never_suspends
+
+@never_suspends
+class Timing:
+    async def dispatch(self, req, res, call_next):
+        started = time.perf_counter()
+        result = await call_next()          # the only await -- fine
+        res.set("x-elapsed", f"{time.perf_counter() - started:.4f}")
+        return result
+```
+
+Without the marker, adding that to an application moves **every** synchronous
+route onto the event loop — a strange price for a timing header.
+
+**The obligation is real and it is yours.** Inside a marked participant, do not
+await anything but `call_next()`: no `asyncio.sleep`, no async HTTP client, no
+lock, no `wait_for`. Break the promise and a synchronous request raises a
+`RuntimeError` from `drive()` naming this as the cause — a clear failure rather
+than a hang, but still your bug.
+
+The built-in interceptors (`TimingInterceptor`, `EnvelopeInterceptor`,
+`CacheInterceptor`) and `TimeoutMiddleware` carry the marker for exactly this
+reason.
+
 ## Built-in middleware
 
 ```python
@@ -207,6 +241,22 @@ AccessLogMiddleware(skip_paths=("/health", "/metrics"), slow_ms=1000)
 
 One structured line per request with method, path, status, duration, request
 id and client IP. `4xx` and slow requests log at `WARNING`, `5xx` at `ERROR`.
+
+The status recorded is the status actually sent. That sounds obvious, but the
+error middleware sits *outside* this one, so a deliberate `404` is still an
+exception in flight when the log line is written — logging it as `500` would
+send people hunting a bug that is not there.
+
+### Deadlines
+
+```python
+TimeoutMiddleware(seconds=10, per_path={"/export": None})
+```
+
+Fails a request with `504` once it passes its deadline. What it can enforce
+differs between the async and sync paths in a way worth understanding before
+choosing a value — see
+[Background tasks, health checks, and deadlines](background-and-health.md#deadlines).
 
 ## Writing your own
 

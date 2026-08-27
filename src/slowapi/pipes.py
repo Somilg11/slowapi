@@ -127,6 +127,13 @@ class ClampPipe(Pipe):
 
 
 class NotEmptyPipe(Pipe):
+    """Reject ``None`` and zero-length values.
+
+    Length-based on purpose, which means ``"   "`` passes.  Pair it with
+    :class:`TrimPipe` -- ``@use_pipes(TrimPipe(), NotEmptyPipe())`` -- when
+    whitespace should not count as content.
+    """
+
     def transform(self, value: t.Any, meta: ArgumentMetadata) -> t.Any:
         if value is None or (hasattr(value, "__len__") and len(value) == 0):
             raise BadRequest(f"{meta.name!r} must not be empty")

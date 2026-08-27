@@ -83,9 +83,20 @@ def is_async_callable(obj: Any) -> bool:
 
 
 async def run_in_threadpool(func: Callable[..., T], /, *args: Any, **kwargs: Any) -> T:
-    """Run a blocking callable in a worker thread, preserving context vars."""
+    """Run a blocking callable in a worker thread, preserving context vars.
+
+    Falls back to calling inline when no loop is running.  Offloading exists to
+    keep a blocking call from stalling the loop *and every other request on it*;
+    with no loop there is nothing to stall, and the alternative is a
+    ``RuntimeError`` from :func:`asyncio.to_thread` -- which is how an upload's
+    temporary file used to be left open on the loop-free WSGI path.
+    """
     if kwargs:
         func = functools.partial(func, **kwargs)
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return func(*args)
     return await asyncio.to_thread(func, *args)
 
 

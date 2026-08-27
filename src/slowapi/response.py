@@ -108,6 +108,8 @@ class Response:
         self._body: bytes = b""
         self._stream: t.Any = None
         self._started = False
+        #: ``(deferred, weak)`` -- see :meth:`etag`.
+        self._auto_etag: tuple[bool, bool] = (False, False)
         if content is not None:
             self.body = self._render_bytes(content)
         self._finalise_headers()
@@ -319,11 +321,33 @@ class Response:
         return self
 
     def etag(self, value: str | None = None, *, weak: bool = False) -> Response:
-        """Set an ``ETag``, computing it from the body when not supplied."""
+        """Set an ``ETag``, computing it from the body when not supplied.
+
+        A computed tag is deferred to send time rather than taken now, because
+        the chain reads naturally in either order::
+
+            res.etag().json(payload)
+            res.json(payload).etag()
+
+        Hashing eagerly would make the first line hash an empty body and emit a
+        tag that matches every other empty response -- a cache poisoning bug
+        that looks like a working ETag.
+        """
         if value is None:
-            value = hashlib.sha256(self._body).hexdigest()[:32]
+            self._auto_etag = (True, weak)
+            return self
+        self._auto_etag = (False, weak)
         self.headers["etag"] = f'{"W/" if weak else ""}"{value}"'
         return self
+
+    def _compute_deferred_etag(self) -> None:
+        """Fill in an ``ETag`` requested before the body existed."""
+        deferred, weak = getattr(self, "_auto_etag", (False, False))
+        if not deferred or self.is_streaming:
+            return
+        digest = hashlib.sha256(self._body).hexdigest()[:32]
+        self.headers["etag"] = f'{"W/" if weak else ""}"{digest}"'
+        self._auto_etag = (False, weak)
 
     def attachment(self, filename: str | None = None) -> Response:
         """Mark the response as a download."""
@@ -433,6 +457,7 @@ class Response:
         return f"{self.status_code} {phrase}"
 
     def raw_headers(self) -> list[tuple[str, str]]:
+        self._compute_deferred_etag()
         return self.headers.raw_items()
 
     def __repr__(self) -> str:

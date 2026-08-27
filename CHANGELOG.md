@@ -7,7 +7,88 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- `Annotated[T, Query(...)]` and friends. The marker lives in the type, so a
+  marked parameter no longer has to sit after every unmarked one and the
+  default slot stays free for an actual default. Works for `Query`, `Path`,
+  `Header`, `Cookie`, `Body`, `Form`, `File`, `Depends` and `Inject`.
+  Unrecognised metadata passes through, so annotations shared with other tools
+  keep working. Declaring a marker in both places is refused at startup.
+- `BackgroundTasks`: an injectable queue of work that runs after the response,
+  in order, on both protocols. One failing task is logged and the rest still
+  run. Synchronous tasks run inline, so queueing work does not opt a route out
+  of the loop-free fast path.
+- `HealthCheck`: `/healthz` (liveness, consults nothing) and `/readyz`
+  (readiness, runs registered probes), with `critical=False` for
+  report-but-do-not-fail and `tolerate=N` to absorb a blip. Answers `503`, not
+  `500`, and reports probe exceptions by class name only. Neither endpoint
+  appears in the OpenAPI document.
+- `TimeoutMiddleware`: a per-request deadline producing `504`, with `per_path`
+  overrides and `None` to exempt a route. The documentation is explicit about
+  what a deadline can enforce on the sync path, where nothing can pre-empt a
+  running function.
+- `SlowAPI.check()` and `slowapi check module:app`: analyse every route without
+  starting a server. Runs automatically during startup, so a broken route now
+  fails the process rather than the first request; the CLI form moves the
+  discovery to a red build. Every broken route is reported, not just the first.
+- `@never_suspends`, marking a participant that awaits nothing but
+  `call_next()` so it keeps the loop-free fast path. Applied to the built-in
+  interceptors and `TimeoutMiddleware`, which previously moved every
+  synchronous route onto the event loop just by being installed.
+- `503 ServiceUnavailable` and `504 GatewayTimeout` exceptions.
+- `TestClient(files=...)` for `multipart/form-data` uploads, and
+  `TestClient(client=("1.2.3.4", 5000))` to control the peer address — needed
+  to test anything that depends on who is connecting.
+- `TestResponse.body`, which un-gzips; `text` and `json()` now read from it, so
+  a test about a payload need not know whether compression is installed.
+
+### Fixed
+
+- **`response.background` never ran on WSGI** for non-streaming responses,
+  while ASGI always ran it — a protocol parity break. Both branches now run it
+  through the response iterable's `close()`, and an `async def` callable is
+  awaited rather than left as an un-awaited coroutine.
+- **`shutdown()` never ran under WSGI.** With no lifespan protocol, a gunicorn
+  worker exiting skipped every `on_event("shutdown")` hook and left the
+  container's singletons undisposed. The adapter now registers an `atexit` hook.
+- **File uploads leaked their temporary file on the loop-free path.**
+  `UploadFile.close()` went through `run_in_threadpool`, which raises
+  `RuntimeError: no running event loop` when there is no loop; cleanup failed
+  silently and leaked a descriptor per upload. `run_in_threadpool` now falls
+  back to calling inline when no loop is running.
+- **Path parameters arrived percent-encoded.** `/items/a%20b` reached the
+  handler as `a%20b`. Segments are now split first and decoded second, so a
+  `%2F` cannot forge a path separator.
+- **A scalar sent alongside a file upload was answered with a JSON parse
+  error.** Scalars on write methods are classified as body parameters before
+  the content type is known; a form-encoded request now reads them from the
+  form. `avatar + caption` is the most common upload shape and it returned 400.
+- **`T | None` was not recognised as `T`.** `UploadFile | None`,
+  `Request | None`, and an optional DTO all fell through to the query string.
+- **An absent optional parameter could receive the `REQUIRED` sentinel** rather
+  than its declared default, so a missing optional upload arrived as `Ellipsis`.
+- **`res.etag()` never produced a `304`.** Conditional requests are now
+  answered on the shared dispatch path, using RFC 9110 weak comparison and
+  honouring `If-Modified-Since` when there is no `ETag`. Safe methods only.
+- **`res.etag()` before the body hashed an empty body**, giving every such
+  response the same tag. A computed tag is now deferred to send time, so chain
+  order does not matter.
+- **Comma-separated list settings were read as one string.**
+  `CORS_ORIGINS=a.com,b.com` produced the single nonsense origin
+  `"a.com,b.com"`, rejecting both — quietly, and only in the environment that
+  had it set.
+- Exception handler arguments are matched by role rather than by position, so
+  `(req, exc, res)` and `(req, res, exc)` both work. The old positional rule
+  contradicted the `(req, res)` order used everywhere else and getting it
+  backwards produced an `AttributeError` from inside error handling.
+
+### Changed
+
+- Coverage is now gated at 85% in `pyproject.toml`, and CI validates every
+  example's routes and runs a scaffolded project's own tests.
+- `NotEmptyPipe` documents that it is length-based, so `"   "` passes; pair it
+  with `TrimPipe` when whitespace should not count as content.
 
 ## [0.1.0] — 2026-08-27
 

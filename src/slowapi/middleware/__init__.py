@@ -16,6 +16,7 @@ from .proxy import ProxyHeadersMiddleware
 from .ratelimit import MemoryRateLimitStore, RateLimitMiddleware, RateLimitStore
 from .security import SecurityHeadersMiddleware, TrustedHostMiddleware
 from .session import Session, SessionMiddleware
+from .timeout import TimeoutMiddleware
 
 __all__ = [
     "AccessLogMiddleware",
@@ -35,6 +36,7 @@ __all__ = [
     "Session",
     "SessionMiddleware",
     "SyncExecutor",
+    "TimeoutMiddleware",
     "TrustedHostMiddleware",
     "adapt",
     "build_chain",

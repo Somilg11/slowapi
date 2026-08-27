@@ -40,6 +40,12 @@ def load_dotenv(path: str = ".env", *, override: bool = False) -> dict[str, str]
     return loaded
 
 
+def _is_sequence(annotation: t.Any) -> bool:
+    """True for ``list[...]``, ``set[...]``, ``tuple[...]`` and their bare forms."""
+    origin = t.get_origin(annotation) or annotation
+    return origin in (list, set, tuple, frozenset)
+
+
 T = t.TypeVar("T")
 
 
@@ -61,8 +67,16 @@ def from_env(model: type[T], *, prefix: str = "", environ: t.Mapping[str, str] |
         key = (prefix + field.name).upper()
         if key not in source:
             continue
+        annotation = hints.get(field.name, str)
+        raw: t.Any = source[key]
+        if _is_sequence(annotation):
+            # An environment variable is one string, so a list has to be spelled
+            # ``A,B,C``.  Without this, ``CORS_ORIGINS=a.com,b.com`` becomes the
+            # single nonsense origin "a.com,b.com" and every real request is
+            # rejected -- quietly, and only in the environment that has it set.
+            raw = [part.strip() for part in raw.split(",") if part.strip()]
         try:
-            kwargs[field.name] = coerce(source[key], hints.get(field.name, str), (key,))
+            kwargs[field.name] = coerce(raw, annotation, (key,))
         except FieldError as exc:
             problems.append(f"{key}: {exc.message}")
 

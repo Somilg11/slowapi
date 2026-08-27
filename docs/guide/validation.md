@@ -24,6 +24,44 @@ def get_item(
 
 `...` means required. A missing required parameter is a `422` naming it.
 
+### `Annotated`: the preferred spelling
+
+Putting the marker in the type instead of the default is the better form, and
+both work identically:
+
+```python
+from typing import Annotated
+
+@app.get("/search")
+def search(
+    q: Annotated[str, Query(min_length=2)],        # required, and still first
+    tags: Annotated[list[str], Query()] = (),
+    page: int = 1,
+    user: Annotated[User, Depends(current_user)],
+    settings: Annotated[Settings, Inject(SETTINGS)],
+): ...
+```
+
+Two things get better. A marked parameter can precede an unmarked one, because
+it no longer occupies the default slot — with `q: str = Query(...)`, every
+parameter after `q` must also have a default. And the default stays an actual
+default: `page: int = 1` says what it means, rather than `page: int = Query(1)`
+saying it twice.
+
+Metadata SlowAPI does not recognise passes through untouched, so annotations
+shared with other tools keep working:
+
+```python
+def handler(user_id: Annotated[int, "the caller's id", SomeOtherTool()]): ...
+```
+
+Declaring a marker in both places is a `ConfigurationError` at startup rather
+than a silent precedence rule:
+
+```python
+q: Annotated[str, Query()] = Query()    # refused: pick one
+```
+
 ## How a parameter's source is decided
 
 When you do not say explicitly, SlowAPI infers, in this order:

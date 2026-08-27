@@ -107,6 +107,21 @@ class TooManyRequests(HTTPException):
         super().__init__(429, detail, headers=headers, **kw)
 
 
+class ServiceUnavailable(HTTPException):
+    def __init__(self, detail: Any = None, retry_after: int | None = None, **kw: Any) -> None:
+        headers = dict(kw.pop("headers", None) or {})
+        if retry_after is not None:
+            headers.setdefault("Retry-After", str(int(retry_after)))
+        super().__init__(503, detail, headers=headers, **kw)
+
+
+class GatewayTimeout(HTTPException):
+    """The handler took longer than the deadline it was given."""
+
+    def __init__(self, detail: Any = None, **kw: Any) -> None:
+        super().__init__(504, detail, **kw)
+
+
 class ValidationError(HTTPException):
     """Raised when request data does not satisfy a handler's declared types."""
 

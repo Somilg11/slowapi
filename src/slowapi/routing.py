@@ -20,6 +20,7 @@ import re
 import typing as t
 import uuid as _uuid
 from dataclasses import dataclass, field
+from urllib.parse import unquote
 
 from .exceptions import ConfigurationError, MethodNotAllowed, NotFound
 
@@ -388,7 +389,11 @@ class Router:
         ``HEAD`` transparently falls back to the ``GET`` route, as required by
         RFC 9110; the adapter drops the body afterwards.
         """
-        parts = path.strip("/").split("/") if path.strip("/") else []
+        # Split first, decode second.  The other order lets ``%2F`` in a value
+        # forge a path separator and match a route the client never asked for,
+        # which is how directory traversal gets through a router.
+        raw = path.strip("/").split("/") if path.strip("/") else []
+        parts = [unquote(part) for part in raw]
         found: list[tuple[_Node, dict[str, t.Any]]] = []
         self._walk(self._root, parts, {}, found)
         if not found:

@@ -44,6 +44,7 @@ __all__ = [
     "controller_routes",
     "http_code",
     "module",
+    "never_suspends",
     "route",
     "set_metadata",
     "version",
@@ -273,3 +274,30 @@ def controller_routes(cls: type) -> list[tuple[str, _RouteMeta, t.Callable[..., 
             for meta in metas:
                 found.append((name, meta, fn))
     return found
+
+
+def never_suspends(target: t.Any) -> t.Any:
+    """Promise that this participant never suspends, keeping the fast path.
+
+    SlowAPI decides at registration time whether a route can be driven without
+    an event loop, and it treats every ``async def`` participant as a reason to
+    give that up.  That is the safe default, but it is pessimistic: middleware
+    that awaits nothing except ``call_next()`` cannot suspend on its own, so it
+    is transparent to the loop-free path.  Mark it and the fast path survives::
+
+        @never_suspends
+        class Timing:
+            async def dispatch(self, req, res, call_next):
+                start = time.perf_counter()
+                result = await call_next()          # the only await -- fine
+                res.set("x-elapsed", f"{time.perf_counter() - start:.4f}")
+                return result
+
+    The obligation is real and it is yours: inside a marked participant, do not
+    await anything but ``call_next()``.  No ``asyncio.sleep``, no async client,
+    no ``asyncio.wait_for``, no lock.  Break the promise and a synchronous
+    request raises ``RuntimeError`` from ``drive()`` naming this as the cause,
+    rather than hanging -- but it is still your bug, not a framework one.
+    """
+    target.__slowapi_never_suspends__ = True
+    return target

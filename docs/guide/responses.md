@@ -67,6 +67,38 @@ res.etag()                                 # computed from the body
 res.etag("v3", weak=True)                  # or supplied
 ```
 
+### Conditional requests are answered for you
+
+Setting an `ETag` and then sending the body anyway saves nothing, so the
+framework compares it against the request:
+
+```python
+@app.get("/config")
+def config(res):
+    return res.etag().json(load_config())
+```
+
+A `GET` or `HEAD` whose `If-None-Match` matches gets a `304` with no body.
+Comparison is RFC 9110 weak comparison, so `W/"abc"` and `"abc"` are the same
+version, `*` matches anything, and a comma-separated list matches if any entry
+does. With no `ETag` set, `If-Modified-Since` is compared against
+`Last-Modified` instead.
+
+Only safe methods are downgraded. Answering a `POST` with `304` would report a
+write as a no-op.
+
+A computed tag is deferred until send time, so both orders give the same
+answer:
+
+```python
+res.etag().json(payload)     # same tag
+res.json(payload).etag()     # as this
+```
+
+Hashing eagerly would make the first line hash an empty body — one tag shared
+by every such response, which is a cache-poisoning bug wearing the costume of a
+working `ETag`.
+
 ## Cookies
 
 ```python
@@ -170,9 +202,15 @@ def signup(res, email: str) -> None:
     res.status(202).json({"queued": email})
 ```
 
-The callable runs after the response has been flushed. It is not a task queue:
-if the process dies, the work is lost. Use it for best-effort work — a metric,
-a cache warm, a non-critical email — and a real queue for anything else.
+The callable runs after the response has been flushed, on both protocols, and
+may be `async def`. It is not a task queue: if the process dies, the work is
+lost. Use it for best-effort work — a metric, a cache warm, a non-critical
+email — and a real queue for anything else.
+
+For more than one piece of work, declare a `BackgroundTasks` parameter instead
+of assigning a single callable; it queues several, keeps them in order, and
+does not let one failure cancel the rest. See
+[Background tasks](background-and-health.md#background-tasks).
 
 ## Empty responses
 

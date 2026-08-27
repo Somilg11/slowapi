@@ -34,6 +34,7 @@ from __future__ import annotations
 
 from ._version import VERSION, __version__
 from .app import SlowAPI
+from .background import BackgroundTasks
 from .config import Settings, from_env, load_dotenv
 from .datastructures import URL, Headers, QueryParams, State, UploadFile
 from .decorators import (
@@ -47,6 +48,7 @@ from .decorators import (
     controller,
     http_code,
     module,
+    never_suspends,
     route,
     set_metadata,
     version,
@@ -68,6 +70,7 @@ from .exceptions import (
 )
 from .execution import ExecutionContext
 from .guards import public, roles, use_guards
+from .health import HealthCheck
 from .interceptors import Interceptor, use_interceptors
 from .params import (
     Body,
@@ -102,6 +105,7 @@ from .static import StaticFiles
 __all__ = [
     "URL",
     "VERSION",
+    "BackgroundTasks",
     "BadRequest",
     "Body",
     "ConfigurationError",
@@ -121,6 +125,7 @@ __all__ = [
     "Head",
     "Header",
     "Headers",
+    "HealthCheck",
     "Inject",
     "InjectionToken",
     "Interceptor",
@@ -165,6 +170,7 @@ __all__ = [
     "injectable",
     "load_dotenv",
     "module",
+    "never_suspends",
     "public",
     "roles",
     "route",

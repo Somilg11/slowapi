@@ -100,6 +100,25 @@ def _cmd_openapi(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_check(args: argparse.Namespace) -> int:
+    """Analyse every route without starting a server.
+
+    Belongs in CI next to the linter: it catches an unresolvable dependency or
+    a contradictory parameter marker at build time, where the cost is a red
+    check, rather than at deploy time, where the cost is a rollback.
+    """
+    from .exceptions import ConfigurationError
+
+    app = _load_app(args.app)
+    try:
+        app.check()
+    except ConfigurationError as exc:
+        print(f"FAIL  {exc}", file=sys.stderr)
+        return 1
+    print(f"OK    {len(app.router.routes)} route(s) validated")
+    return 0
+
+
 def _cmd_secret(args: argparse.Namespace) -> int:
     print(secrets.token_urlsafe(args.bytes))
     return 0
@@ -139,6 +158,10 @@ def build_parser() -> argparse.ArgumentParser:
     openapi_parser.add_argument("app")
     openapi_parser.add_argument("-o", "--output")
     openapi_parser.set_defaults(func=_cmd_openapi)
+
+    check_parser = sub.add_parser("check", help="validate every route without serving")
+    check_parser.add_argument("app")
+    check_parser.set_defaults(func=_cmd_check)
 
     secret_parser = sub.add_parser("secret", help="generate a SECRET_KEY")
     secret_parser.add_argument("--bytes", type=int, default=48)

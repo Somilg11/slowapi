@@ -116,6 +116,7 @@ class SlowAPI:
         self._shutdown_hooks: list[t.Callable[..., t.Any]] = list(on_shutdown)
         self._prepared: dict[int, _Prepared] = {}
         self._started = False
+        self._atexit_registered = False
         self._templates: t.Any = None
         self._openapi_cache: dict[str, t.Any] | None = None
 
@@ -392,11 +393,41 @@ class SlowAPI:
                 participants.append(getattr(target, "on_module_init", None))
         return not any(_maybe_async(p) for p in participants)
 
+    def check(self) -> SlowAPI:
+        """Analyse every route now and raise on the first set of problems.
+
+        Registration cannot do this itself: a handler may inject a provider
+        that is registered on the next line, so a route's signature is only
+        fully knowable once wiring is complete.  Startup is that moment, and it
+        is early enough to matter -- a process that fails to start never takes
+        traffic, whereas an error found on the first request is an outage.
+
+        Every route is reported, not just the first, because fixing a typo only
+        to meet the next one is a poor use of a deploy cycle.  Analysis results
+        are cached, so this doubles as warming the dispatch plans.
+
+        Called for you by :meth:`startup`.  Call it directly -- or run
+        ``slowapi check`` -- to fail a build instead of a deploy.
+        """
+        problems: list[str] = []
+        for route in self.router.routes:
+            try:
+                self._prepare(route)
+            except Exception as exc:
+                where = getattr(route.handler, "__qualname__", repr(route.handler))
+                problems.append(f"  {route.method} {route.path} ({where}): {exc}")
+        if problems:
+            raise ConfigurationError(
+                f"{len(problems)} route(s) failed validation:\n" + "\n".join(problems)
+            )
+        return self
+
     async def startup(self) -> None:
         """Build singletons and run startup hooks.  Idempotent."""
         if self._started:
             return
         self._started = True
+        self.check()
         await self.container.startup()
         for hook in self._startup_hooks:
             await maybe_await(hook())
@@ -503,7 +534,8 @@ class SlowAPI:
             loop,
         )
         result = await chain()
-        return result if isinstance(result, Response) else response
+        final = result if isinstance(result, Response) else response
+        return _apply_conditional(request, final)
 
     def _route_middlewares(self, request: Request) -> tuple[t.Any, ...]:
         """Route-scoped middleware, resolved before the route is matched.
@@ -650,9 +682,69 @@ class SlowAPI:
         return f"<SlowAPI {self.title!r} routes={len(self.router.routes)}>"
 
 
+def _apply_conditional(request: Request, response: Response) -> Response:
+    """Downgrade a response to 304 when the client already has this version.
+
+    Setting an ``ETag`` and then sending the body anyway saves nothing, so the
+    comparison belongs here -- once, on the shared dispatch path -- rather than
+    in each handler that happens to remember.  Applies to safe methods only:
+    answering a POST with 304 would tell the client its write was a no-op.
+
+    Both validators are honoured, ``If-None-Match`` first, as RFC 9110 requires.
+    """
+    if request.method not in ("GET", "HEAD") or not (200 <= response.status_code < 300):
+        return response
+
+    # A tag requested before the body existed is computed now, so that
+    # ``res.etag().json(payload)`` is comparable rather than a hash of b"".
+    response._compute_deferred_etag()
+    etag = response.headers.get("etag")
+    if etag:
+        candidates = request.get("if-none-match")
+        if candidates and _etag_matches(etag, candidates):
+            return _not_modified(response)
+        return response
+
+    last_modified = response.headers.get("last-modified")
+    since = request.get("if-modified-since")
+    if last_modified and since and last_modified == since:
+        return _not_modified(response)
+    return response
+
+
+def _etag_matches(etag: str, header: str) -> bool:
+    """RFC 9110 weak comparison: ``W/"x"`` and ``"x"`` are the same version."""
+    if header.strip() == "*":
+        return True
+    normalise = lambda value: value.strip().removeprefix("W/").strip()  # noqa: E731
+    target = normalise(etag)
+    return any(normalise(candidate) == target for candidate in header.split(","))
+
+
+def _not_modified(response: Response) -> Response:
+    """A 304 carries no body, but must repeat the caching headers."""
+    response.status_code = 304
+    response.body = b""
+    for header in ("content-length", "content-type", "content-encoding"):
+        if header in response.headers:
+            del response.headers[header]
+    return response
+
+
 def _maybe_async(participant: t.Any) -> bool:
-    """Would this participant force the async path?"""
+    """Would this participant force the async path?
+
+    Being ``async def`` is the usual answer, but it is not the same question.
+    A coroutine only forces an event loop if it can actually *suspend*; one
+    that awaits nothing but the rest of the chain is transparent to
+    :func:`slowapi.concurrency.drive`.  The framework's own middleware is
+    written that way, and :func:`slowapi.never_suspends` lets user middleware
+    make the same promise -- see its docstring for the (real) obligation that
+    comes with it.
+    """
     if participant is None:
+        return False
+    if getattr(participant, "__slowapi_never_suspends__", False):
         return False
     if inspect.isclass(participant):
         for attribute in ("dispatch", "intercept", "can_activate", "transform", "__call__"):

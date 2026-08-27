@@ -42,8 +42,16 @@ format: ## Auto-format and auto-fix
 typecheck: ## Static type check
 	$(BIN)/mypy
 
+.PHONY: validate
+validate: ## Analyse every example's routes without starting a server
+	@for example in examples/*/; do \
+		if [ -f "$$example/main.py" ]; then \
+			(cd "$$example" && ../../$(BIN)/python -m slowapi check main:app) || exit 1; \
+		fi; \
+	done
+
 .PHONY: check
-check: lint typecheck test ## Everything CI runs
+check: lint typecheck validate test ## Everything CI runs
 
 .PHONY: bench
 bench: ## Compare the WSGI and ASGI paths
