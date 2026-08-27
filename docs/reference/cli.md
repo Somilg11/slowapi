@@ -51,6 +51,44 @@ POST     /tasks                create_task
 `--json` emits machine-readable output, which is useful for asserting in CI
 that a route was not removed by accident.
 
+## `check`
+
+Analyse every route without starting a server.
+
+```bash
+slowapi check main:app
+```
+
+```
+OK    14 route(s) validated
+```
+
+This resolves every handler signature, every `Depends` chain, every guard,
+interceptor and pipe, and every provider a handler injects. A problem is
+reported with the route and handler that owns it:
+
+```
+FAIL  2 route(s) failed validation:
+  GET /reports/{id} (get_report): Could not resolve type hints for 'get_report':
+    name 'ReportService' is not defined. Check for forward references to names
+    that are not importable at runtime.
+  POST /items (create_item): Parameter 'body' declares Body() inside Annotated[...]
+    and Query() as its default. Pick one.
+```
+
+Every broken route is listed, not just the first — fixing one typo only to meet
+the next one on the following run is a poor use of a deploy cycle.
+
+Run it in CI next to the linter. The same analysis runs automatically at
+startup, so a broken route already fails the process rather than the first
+request; `check` moves the discovery earlier still, to a red build.
+
+```yaml
+- run: slowapi check main:app
+```
+
+Exit code `1` on failure, `0` on success.
+
 ## `openapi`
 
 Dump the generated schema.

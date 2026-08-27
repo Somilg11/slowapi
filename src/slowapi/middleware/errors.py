@@ -13,6 +13,7 @@ In debug mode the second rule is relaxed so you can see what broke.
 
 from __future__ import annotations
 
+import inspect
 import traceback
 import typing as t
 
@@ -23,6 +24,94 @@ from ..response import Response
 __all__ = ["ErrorMiddleware", "ExceptionHandlers"]
 
 Handler = t.Callable[[Request, BaseException, Response], t.Any]
+
+
+#: Parameter names that identify each role when the annotation does not.
+_REQUEST_NAMES = frozenset({"request", "req", "r"})
+_RESPONSE_NAMES = frozenset({"response", "res"})
+_EXCEPTION_NAMES = frozenset({"exception", "exc", "error", "err", "e"})
+
+#: Cache keyed by the handler function, since the answer never changes.
+_ARGUMENT_ORDER: dict[t.Any, tuple[str, ...]] = {}
+
+
+def _annotation_name(annotation: t.Any) -> str:
+    """The annotation's bare name.
+
+    ``from __future__ import annotations`` turns every annotation into a
+    string, so comparing against the class alone would work in some modules and
+    not others -- a difference nobody should have to debug.
+    """
+    if isinstance(annotation, str):
+        return annotation.rsplit(".", 1)[-1].strip("\"'")
+    return getattr(annotation, "__name__", "")
+
+
+def _is_request(annotation: t.Any) -> bool:
+    return annotation is Request or _annotation_name(annotation) == "Request"
+
+
+def _is_response(annotation: t.Any) -> bool:
+    return annotation is Response or _annotation_name(annotation) == "Response"
+
+
+def _is_exception(annotation: t.Any) -> bool:
+    if isinstance(annotation, type):
+        return issubclass(annotation, BaseException)
+    name = _annotation_name(annotation)
+    return name.endswith(("Error", "Exception")) or name in ("HTTPException", "BaseException")
+
+
+def _argument_order(handler: t.Any) -> tuple[str, ...]:
+    """Work out which of ``request``, ``exception`` and ``response`` go where.
+
+    Handlers used to be positional -- ``(req, exc, res)`` -- which reads as an
+    arbitrary rule next to the ``(req, res)`` order used by every handler and
+    middleware in the framework, and getting it backwards produced a confusing
+    ``AttributeError`` deep inside error handling.  Roles are matched by
+    annotation first, then by parameter name, so both orders work and neither
+    has to be memorised.  Anything unrecognised keeps its position, which is
+    what makes the historical order still correct.
+    """
+    cached = _ARGUMENT_ORDER.get(handler)
+    if cached is not None:
+        return cached
+
+    try:
+        parameters = list(inspect.signature(handler).parameters.values())
+    except (TypeError, ValueError):  # pragma: no cover - builtins
+        return ("request", "exception", "response")
+    if parameters and parameters[0].name in ("self", "cls"):
+        parameters = parameters[1:]
+
+    positional = ["request", "exception", "response"]
+    roles: list[str | None] = [None] * len(parameters)
+    for index, parameter in enumerate(parameters):
+        annotation = parameter.annotation
+        name = parameter.name.lower()
+        if _is_request(annotation) or name in _REQUEST_NAMES:
+            roles[index] = "request"
+        elif _is_response(annotation) or name in _RESPONSE_NAMES:
+            roles[index] = "response"
+        elif name in _EXCEPTION_NAMES or _is_exception(annotation):
+            roles[index] = "exception"
+
+    # Fill anything unrecognised from the historical order, skipping roles
+    # already claimed by name so a partial match cannot duplicate one.
+    remaining = [role for role in positional if role not in roles]
+    for index, role in enumerate(roles):
+        if role is None and remaining:
+            roles[index] = remaining.pop(0)
+
+    order = tuple(role or "request" for role in roles)
+    _ARGUMENT_ORDER[handler] = order
+    return order
+
+
+def call_handler(handler: t.Any, request: Request, exc: BaseException, response: Response) -> t.Any:
+    """Invoke a user exception handler with its arguments in its own order."""
+    values = {"request": request, "exception": exc, "response": response}
+    return handler(*(values[role] for role in _argument_order(handler)))
 
 
 class ExceptionHandlers:
@@ -80,7 +169,7 @@ class ErrorMiddleware:
         if custom is not None:
             from ..concurrency import maybe_await
 
-            result = await maybe_await(custom(request, exc, response))
+            result = await maybe_await(call_handler(custom, request, exc, response))
             if isinstance(result, Response):
                 return result
             if result is not None:
@@ -106,7 +195,7 @@ class ErrorMiddleware:
         if custom is not None:
             from ..concurrency import maybe_await
 
-            result = await maybe_await(custom(request, exc, response))
+            result = await maybe_await(call_handler(custom, request, exc, response))
             if isinstance(result, Response):
                 return result
             if result is not None:

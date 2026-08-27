@@ -75,6 +75,38 @@ jobs:
       - run: pip install .
       - run: python -c "import slowapi; print(slowapi.__version__)"
       - run: python -m slowapi --version
+      - name: Every declared dependency must be behind an extra
+        run: |
+          python - <<'EOF'
+          from importlib.metadata import requires
+          required = [r for r in (requires("slowapi-framework") or []) if "extra ==" not in r]
+          assert not required, f"unconditional runtime dependencies: {required}"
+          print("zero required runtime dependencies: confirmed")
+          EOF
+
+  validate:
+    name: Scaffold, validate and serve
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev,all]"
+      # `slowapi check` analyses every route without starting a server, which is
+      # what makes a broken dependency a red build instead of a rolled-back deploy.
+      - name: Every example passes route validation
+        run: |
+          for example in examples/*/; do
+            if [ -f "$example/main.py" ]; then
+              (cd "$example" && python -m slowapi check main:app)
+            fi
+          done
+      - name: A scaffolded project passes its own tests
+        run: |
+          python -m slowapi new smoke-svc --template api
+          cd smoke-svc && python -m pytest -q
 
   build:
     name: Build distributions

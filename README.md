@@ -106,7 +106,33 @@ def test_a_fully_sync_wsgi_request_creates_no_event_loop():
     assert _LoopThread._instance is None
 ```
 
+And the fast path is defended, not just achieved. A helper that is `async def`
+but awaits nothing except `call_next()` cannot suspend, so `@never_suspends`
+lets it keep the loop-free path instead of quietly costing it — which is what
+the built-in interceptors and `TimeoutMiddleware` would otherwise do to every
+synchronous route just by being installed.
+
 Details: [Dual-protocol dispatch](docs/internals/dual-protocol.md).
+
+---
+
+## Broken routes fail the build, not the deploy
+
+Every handler signature, `Depends` chain, guard, interceptor, pipe and injected
+provider is analysed before the process serves anything:
+
+```bash
+$ slowapi check main:app
+FAIL  2 route(s) failed validation:
+  GET /reports/{id} (get_report): Could not resolve type hints for 'get_report':
+    name 'ReportService' is not defined.
+  POST /items (create_item): Parameter 'body' declares Body() inside Annotated[...]
+    and Query() as its default. Pick one.
+```
+
+Every broken route, not just the first. The same analysis runs during startup,
+so a typo that would have surfaced on the first production request instead
+stops the process from coming up — and in CI, stops the merge.
 
 ---
 
@@ -244,18 +270,19 @@ cd my-service && python -m slowapi run main:app --reload
 | | |
 | --- | --- |
 | **Routing** | Trie matching, `{id:int}` and `:id` syntaxes, six converters plus regex, reverse URLs, correct `HEAD`/`405`/`Allow` |
-| **Validation** | Dataclasses, `TypedDict`, Pydantic; every error at once; constraints in the schema |
+| **Validation** | `Annotated` or defaults; dataclasses, `TypedDict`, Pydantic; every error at once; constraints in the schema |
 | **Injection** | `Depends` with caching and generator teardown, plus a scoped DI container |
 | **Structure** | Controllers, modules, enforced `exports`, guards, interceptors, pipes |
-| **Middleware** | CORS, security headers, trusted host, gzip, proxy headers, rate limit, sessions, request id, access logs |
-| **Responses** | JSON, HTML, redirects, streaming, SSE, files with ETag + byte ranges, background work |
+| **Middleware** | CORS, security headers, trusted host, gzip, proxy headers, rate limit, sessions, request id, access logs, timeouts |
+| **Responses** | JSON, HTML, redirects, streaming, SSE, files with ETag + byte ranges, automatic `304`s |
+| **Operations** | Background tasks, liveness/readiness probes, per-request deadlines |
 | **Templating** | Autoescaping engine with inheritance, loops, filters — or Jinja2 |
 | **Static files** | ETags, `304`s, byte ranges, traversal and symlink protection, SPA fallback |
 | **OpenAPI** | 3.1 generated from the running code, Swagger UI and ReDoc |
 | **Config** | Typed settings from the environment, `.env` loader, production guardrails |
 | **Observability** | Structured JSON logs, correlation ids threaded through logs and error bodies |
-| **Testing** | `TestClient` over real WSGI and ASGI adapters |
-| **CLI** | `run`, `routes`, `openapi`, `secret`, `new` |
+| **Testing** | `TestClient` over real WSGI and ASGI adapters, with uploads and a settable peer address |
+| **CLI** | `run`, `check`, `routes`, `openapi`, `secret`, `new` |
 
 ---
 

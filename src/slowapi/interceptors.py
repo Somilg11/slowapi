@@ -21,6 +21,7 @@ import time
 import typing as t
 
 from .concurrency import maybe_await
+from .decorators import never_suspends
 from .execution import ExecutionContext
 
 __all__ = [
@@ -76,8 +77,14 @@ async def run_interceptors(
     return await build(0)
 
 
+@never_suspends
 class TimingInterceptor(Interceptor):
-    """Record handler duration on the response and in ``request.state``."""
+    """Record handler duration on the response and in ``request.state``.
+
+    Marked ``@never_suspends`` -- as are the other built-ins here -- because it
+    awaits nothing but ``call_next()``.  Without the marker, adding any of them
+    to a synchronous route would quietly move it onto the event loop, which is
+    a strange price to pay for a timing header."""
 
     def __init__(self, header: str = "X-Handler-Time") -> None:
         self.header = header
@@ -92,6 +99,7 @@ class TimingInterceptor(Interceptor):
             ctx.response.set(self.header, f"{elapsed_ms:.2f}ms")
 
 
+@never_suspends
 class EnvelopeInterceptor(Interceptor):
     """Wrap successful payloads in a consistent envelope.
 
@@ -118,6 +126,7 @@ class EnvelopeInterceptor(Interceptor):
         return payload
 
 
+@never_suspends
 class CacheInterceptor(Interceptor):
     """A minimal in-process response cache keyed by method, path and query.
 

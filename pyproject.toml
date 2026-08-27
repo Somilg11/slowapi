@@ -86,10 +86,20 @@ markers = [
 [tool.coverage.run]
 source = ["src/slowapi"]
 branch = true
-omit = ["src/slowapi/__main__.py", "src/slowapi/scaffold.py"]
+# `server.py` shells out to uvicorn/gunicorn/wsgiref and `scaffold.py` writes
+# files; both are exercised by the CLI smoke test in CI rather than by pytest,
+# so counting their lines here would only invite a meaningless number.
+omit = [
+    "src/slowapi/__main__.py",
+    "src/slowapi/scaffold.py",
+    "src/slowapi/server.py",
+]
 
 [tool.coverage.report]
 precision = 1
+# A gate, not a target.  Raise it when the number rises; never lower it to make
+# a red build green -- that is the one change that makes the gate worthless.
+fail_under = 85
 show_missing = true
 skip_covered = true
 exclude_lines = [

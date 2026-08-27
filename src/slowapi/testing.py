@@ -23,6 +23,63 @@ if t.TYPE_CHECKING:  # pragma: no cover
 __all__ = ["TestClient", "TestResponse"]
 
 
+#: What ``TestClient.request(files=...)`` accepts.
+FileSpec = bytes | t.IO[bytes] | tuple[str, t.Any] | tuple[str, t.Any, str]
+FileArg = t.Mapping[str, FileSpec] | t.Sequence[tuple[str, FileSpec]]
+
+
+def encode_multipart(
+    data: t.Mapping[str, t.Any] | bytes | str | None, files: FileArg
+) -> tuple[bytes, str]:
+    """Build a ``multipart/form-data`` body from fields and uploads.
+
+    Written out by hand rather than delegated: the test client is the only
+    thing in the project allowed to construct a request, and taking a
+    dependency here to test a zero-dependency framework would be a strange
+    trade.  The wire format is small enough to own.
+    """
+    boundary = "----slowapitestboundary7MA4YWxkTrZu0gW"
+    parts: list[bytes] = []
+
+    if isinstance(data, t.Mapping):
+        for field, value in data.items():
+            values = value if isinstance(value, (list, tuple)) else [value]
+            for item in values:
+                parts.append(
+                    f'--{boundary}\r\nContent-Disposition: form-data; name="{field}"\r\n\r\n'
+                    f"{item}\r\n".encode()
+                )
+
+    entries = files.items() if isinstance(files, t.Mapping) else files
+    for field, spec in entries:
+        filename, payload, content_type = _normalise_file(field, spec)
+        header = (
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="{field}"; filename="{filename}"\r\n'
+            f"Content-Type: {content_type}\r\n\r\n"
+        )
+        parts.append(header.encode() + payload + b"\r\n")
+
+    parts.append(f"--{boundary}--\r\n".encode())
+    return b"".join(parts), f"multipart/form-data; boundary={boundary}"
+
+
+def _normalise_file(field: str, spec: t.Any) -> tuple[str, bytes, str]:
+    """Accept the several shapes people reasonably expect to work."""
+    filename, handle, content_type = field, spec, "application/octet-stream"
+    if isinstance(spec, tuple):
+        if len(spec) == 3:
+            filename, handle, content_type = spec
+        elif len(spec) == 2:
+            filename, handle = spec
+        else:  # pragma: no cover - a malformed tuple is a test bug
+            raise TypeError(f"files[{field!r}] must be a 2- or 3-tuple, got {len(spec)} items")
+    payload = handle if isinstance(handle, bytes) else handle.read()
+    if isinstance(payload, str):  # pragma: no cover - a text handle still works
+        payload = payload.encode()
+    return str(filename), payload, content_type
+
+
 class TestResponse:
     """The result of a test request."""
 
@@ -40,15 +97,34 @@ class TestResponse:
         self.request_path = path
 
     @property
+    def body(self) -> bytes:
+        """The decoded body.
+
+        A real HTTP client transparently un-gzips, so a test that only wanted
+        to assert on a JSON payload should not have to know that compression
+        middleware is installed.  ``content`` still holds the bytes on the wire
+        for tests that are specifically about the encoding.
+        """
+        encoding = self.headers.get("content-encoding", "").lower()
+        if "gzip" not in encoding or not self.content:
+            return self.content
+        import gzip
+
+        try:
+            return gzip.decompress(self.content)
+        except OSError:  # pragma: no cover - a truncated body is the test's point
+            return self.content
+
+    @property
     def text(self) -> str:
         charset = "utf-8"
         content_type = self.headers.get("content-type", "")
         if "charset=" in content_type:
             charset = content_type.split("charset=")[-1].split(";")[0].strip()
-        return self.content.decode(charset, errors="replace")
+        return self.body.decode(charset, errors="replace")
 
     def json(self) -> t.Any:
-        return jsonlib.loads(self.content or b"null")
+        return jsonlib.loads(self.body or b"null")
 
     @property
     def ok(self) -> bool:
@@ -90,6 +166,7 @@ class TestClient:
         base_url: str = "http://testserver",
         headers: t.Mapping[str, str] | None = None,
         follow_cookies: bool = True,
+        client: tuple[str, int] = ("127.0.0.1", 50000),
     ) -> None:
         if protocol not in ("wsgi", "asgi"):
             raise ValueError("protocol must be 'wsgi' or 'asgi'")
@@ -98,6 +175,9 @@ class TestClient:
         self.base_url = base_url.rstrip("/")
         self.default_headers = dict(headers or {})
         self.follow_cookies = follow_cookies
+        #: The peer address the app sees.  Set it to test anything that depends
+        #: on who is connecting -- proxy trust, IP allow-lists, rate-limit keys.
+        self.client = client
         #: Cookies collected from previous responses, sent on the next request.
         self.cookies: dict[str, str] = {}
 
@@ -111,10 +191,18 @@ class TestClient:
         params: t.Mapping[str, t.Any] | None = None,
         json: t.Any = None,
         data: t.Mapping[str, t.Any] | bytes | str | None = None,
+        files: FileArg | None = None,
         headers: t.Mapping[str, str] | None = None,
         cookies: t.Mapping[str, str] | None = None,
     ) -> TestResponse:
-        """Send one request and return the response."""
+        """Send one request and return the response.
+
+        :param files:
+            Uploads to send as ``multipart/form-data``, alongside any ``data``.
+            Accepts ``{field: (filename, fileobj, content_type)}`` or a list of
+            ``(field, (filename, fileobj, content_type))`` pairs when one field
+            carries several files.  ``fileobj`` may also be raw ``bytes``.
+        """
         url = urlsplit(path if "://" in path else self.base_url + path)
         query = url.query
         if params:
@@ -123,7 +211,10 @@ class TestClient:
 
         body = b""
         merged: dict[str, str] = {**self.default_headers, **(headers or {})}
-        if json is not None:
+        if files is not None:
+            body, content_type = encode_multipart(data, files)
+            merged.setdefault("content-type", content_type)
+        elif json is not None:
             body = jsonlib.dumps(json).encode()
             merged.setdefault("content-type", "application/json")
         elif isinstance(data, (bytes, str)):
@@ -181,7 +272,8 @@ class TestClient:
             "SERVER_NAME": "testserver",
             "SERVER_PORT": "80",
             "SERVER_PROTOCOL": "HTTP/1.1",
-            "REMOTE_ADDR": "127.0.0.1",
+            "REMOTE_ADDR": self.client[0],
+            "REMOTE_PORT": str(self.client[1]),
             "wsgi.version": (1, 0),
             "wsgi.url_scheme": urlsplit(self.base_url).scheme or "http",
             "wsgi.input": io.BytesIO(body),
@@ -226,7 +318,7 @@ class TestClient:
             "root_path": "",
             "query_string": query.encode(),
             "headers": [(k.lower().encode(), v.encode()) for k, v in headers.items()],
-            "client": ("127.0.0.1", 50000),
+            "client": self.client,
             "server": ("testserver", 80),
         }
 

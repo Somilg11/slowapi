@@ -24,6 +24,7 @@ import inspect
 import typing as t
 from dataclasses import dataclass, field
 
+from .background import BackgroundTasks
 from .concurrency import maybe_await
 from .datastructures import UploadFile
 from .exceptions import ConfigurationError, ValidationError
@@ -44,7 +45,7 @@ from .params import (
 )
 from .request import Request
 from .response import Response
-from .validation import FieldError, coerce, validate_param
+from .validation import FieldError, coerce, is_union, validate_param
 
 __all__ = ["HandlerSignature", "ParamSpec", "analyse"]
 
@@ -114,8 +115,23 @@ def _is_marker(annotation: t.Any, marker: type) -> bool:
     return annotation is marker or (inspect.isclass(annotation) and issubclass(annotation, marker))
 
 
+def _strip_optional(annotation: t.Any) -> t.Any:
+    """Return ``T`` from ``T | None`` (and ``Optional[T]``).
+
+    Optionality is expressed by the default, not the annotation, everywhere the
+    classifier looks -- so ``UploadFile | None = None`` has to reduce to
+    ``UploadFile`` or an optional upload is silently read off the query string
+    instead.
+    """
+    origin = t.get_origin(annotation)
+    if not is_union(origin):
+        return annotation
+    args = [arg for arg in t.get_args(annotation) if arg is not type(None)]
+    return args[0] if len(args) == 1 else annotation
+
+
 def _sequence_annotation(annotation: t.Any) -> bool:
-    return t.get_origin(annotation) in (list, set, frozenset, tuple)
+    return t.get_origin(_strip_optional(annotation)) in (list, set, frozenset, tuple)
 
 
 def analyse(
@@ -170,6 +186,7 @@ def analyse(
         annotation = hints.get(name, parameter.annotation)
         default = parameter.default
         marker = default if isinstance(default, (Param, Depends, Inject)) else None
+        annotation, marker = _unwrap_annotated(annotation, marker, name=name)
         plain_default = REQUIRED if (marker is not None or default is _EMPTY) else default
 
         spec = _classify(
@@ -202,6 +219,40 @@ def analyse(
     return result
 
 
+def _unwrap_annotated(annotation: t.Any, marker: t.Any, *, name: str) -> tuple[t.Any, t.Any]:
+    """Split ``Annotated[T, Query(...)]`` into ``(T, Query(...))``.
+
+    This is the preferred spelling: the marker lives in the type, so the
+    default stays a real default and the parameter can keep its place among
+    the positional arguments::
+
+        def search(q: Annotated[str, Query(min_length=2)], page: int = 1): ...
+
+    Metadata SlowAPI does not recognise is left alone, so annotations shared
+    with other tools -- ``Annotated[int, "user id"]``, or a Pydantic
+    ``Field`` -- pass through untouched.
+    """
+    if t.get_origin(annotation) is not t.Annotated:
+        return annotation, marker
+
+    inner, *metadata = t.get_args(annotation)
+    found = [m for m in metadata if isinstance(m, (Param, Depends, Inject))]
+    if not found:
+        return inner, marker
+    if len(found) > 1:
+        raise ConfigurationError(
+            f"Parameter {name!r} has {len(found)} SlowAPI markers inside Annotated[...]: "
+            f"{', '.join(type(m).__name__ for m in found)}. Keep one."
+        )
+    if marker is not None:
+        raise ConfigurationError(
+            f"Parameter {name!r} declares {type(found[0]).__name__}() inside Annotated[...] "
+            f"and {type(marker).__name__}() as its default. Pick one -- the Annotated form "
+            "is preferred, because it leaves the default free to be an actual default."
+        )
+    return inner, found[0]
+
+
 def _classify(
     *,
     name: str,
@@ -215,6 +266,9 @@ def _classify(
 ) -> ParamSpec:
     """Decide the source of a single parameter."""
     sequence = _sequence_annotation(annotation)
+    #: ``T`` from ``T | None``, for the identity checks below.  The declared
+    #: annotation is kept for coercion so ``None`` stays a legal value.
+    core = _strip_optional(annotation)
 
     if isinstance(marker, Depends):
         dependency = marker.dependency
@@ -259,11 +313,13 @@ def _classify(
         )
 
     # Framework objects, by annotation or by convention.
-    if annotation is Request or _is_marker(annotation, Req):
+    if core is BackgroundTasks:
+        return ParamSpec(name, "background", annotation)
+    if core is Request or _is_marker(annotation, Req):
         return ParamSpec(name, "request", annotation)
-    if annotation is Response or _is_marker(annotation, Res):
+    if core is Response or _is_marker(annotation, Res):
         return ParamSpec(name, "response", annotation)
-    if annotation is ExecutionContext or _is_marker(annotation, Ctx):
+    if core is ExecutionContext or _is_marker(annotation, Ctx):
         return ParamSpec(name, "context", annotation)
     if annotation is _EMPTY:
         if name in _REQUEST_ALIASES:
@@ -276,15 +332,17 @@ def _classify(
     if name in path_params:
         return ParamSpec(name, "path", annotation, Path(), REQUIRED, name)
 
-    if annotation is UploadFile or (sequence and t.get_args(annotation)[:1] == (UploadFile,)):
+    if core is UploadFile or (
+        sequence and t.get_args(_strip_optional(annotation))[:1] == (UploadFile,)
+    ):
         return ParamSpec(
             name, "file", annotation, File(), plain_default, name, is_sequence=sequence
         )
 
-    if annotation is not _EMPTY and annotation in container_tokens:
-        return ParamSpec(name, "inject", annotation, token=annotation, default=plain_default)
+    if core is not _EMPTY and core in container_tokens:
+        return ParamSpec(name, "inject", annotation, token=core, default=plain_default)
 
-    if annotation is not _EMPTY and is_dto(annotation) and method in _BODY_METHODS:
+    if core is not _EMPTY and is_dto(core) and method in _BODY_METHODS:
         return ParamSpec(name, "body", annotation, Body(plain_default), plain_default, name)
 
     if method in _BODY_METHODS and not sequence:
@@ -323,6 +381,30 @@ class Resolver:
         self._cache: dict[t.Any, t.Any] = {}
         self.errors: list[dict[str, t.Any]] = []
 
+    def _background(self) -> BackgroundTasks:
+        """The request's task queue, created on first ask.
+
+        Attaching it to the response here rather than after the handler means a
+        dependency can queue work even when the handler never sees the object.
+        A handler that assigns ``res.background`` itself still wins: explicit
+        beats implicit, and the assignment happens later.
+        """
+        response = self.ctx.response
+        existing = getattr(response, "background", None)
+        if isinstance(existing, BackgroundTasks):
+            return existing
+        tasks = BackgroundTasks()
+        response.background = tasks
+        return tasks
+
+    def _is_form_request(self) -> bool:
+        """True when the body is form-encoded rather than JSON."""
+        content_type = self.ctx.request.get("content-type", "") or ""
+        return content_type.partition(";")[0].strip().lower() in (
+            "multipart/form-data",
+            "application/x-www-form-urlencoded",
+        )
+
     async def _get_body(self) -> t.Any:
         if self._body is _MISSING:
             self._body = await self.ctx.request.json()
@@ -358,6 +440,8 @@ class Resolver:
             return self.ctx.response
         if spec.source == "context":
             return self.ctx
+        if spec.source == "background":
+            return self._background()
         if spec.source == "inject":
             return await self.ctx.container.resolve(spec.token)
         if spec.source == "depends":
@@ -369,7 +453,18 @@ class Resolver:
         if raw is _MISSING:
             if spec.required:
                 raise FieldError(loc, "Field is required", "missing")
-            value = spec.param.get_default() if spec.param is not None else spec.default
+            # A ``default_factory`` has to run per request; otherwise the
+            # parameter's own declared default wins.  The marker's default is
+            # only a fallback, because markers the framework synthesises for an
+            # inferred parameter -- ``File()`` for an upload, say -- carry no
+            # default of their own and would otherwise hand the handler the
+            # REQUIRED sentinel in place of the ``None`` it declared.
+            if spec.param is not None and spec.param.default_factory is not None:
+                value = spec.param.get_default()
+            elif spec.default is not REQUIRED:
+                value = spec.default
+            else:
+                value = spec.param.get_default() if spec.param is not None else None
         else:
             value = coerce(raw, spec.annotation, loc)
             if spec.param is not None:
@@ -409,6 +504,18 @@ class Resolver:
             return request.cookies.get(key, _MISSING)
 
         if spec.source == "body":
+            # A form-encoded request has no JSON to parse.  Scalars on a write
+            # method are classified "body" before the content type is known, so
+            # a caption sent alongside an avatar would otherwise be answered
+            # with "Body is not valid JSON" -- for a body that never claimed to
+            # be JSON.
+            if self._is_form_request():
+                form = await self._get_form()
+                if key in form:
+                    return form.getlist(key) if spec.is_sequence else form[key]
+                if spec.fallback == "query" and key in request.query_params:
+                    return request.query_params[key]
+                return _MISSING
             payload = await self._get_body()
             embed = getattr(spec.param, "embed", False)
             if payload is not None and embed:

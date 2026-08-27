@@ -46,18 +46,52 @@ client.head("/users")
 client.options("/users", headers={"origin": "https://app.example"})
 ```
 
+### File uploads
+
+```python
+client.post("/avatar", files={"avatar": ("me.png", open("me.png", "rb"), "image/png")})
+client.post("/avatar", files={"avatar": ("me.png", b"raw bytes", "image/png")})
+
+# Fields and files together, which is the usual shape:
+client.post("/avatar", data={"caption": "my face"}, files={"avatar": (...)})
+
+# Several files under one field name:
+client.post("/docs", files=[("docs", ("a.txt", b"a", "text/plain")),
+                            ("docs", ("b.txt", b"b", "text/plain"))])
+```
+
+The body is encoded as `multipart/form-data` and parsed by the real parser, so
+a passing test means the endpoint works, not that the client was lenient.
+
+### Who is connecting
+
+Anything that depends on the peer address — proxy trust, IP allow-lists,
+rate-limit buckets — needs to control it:
+
+```python
+client = TestClient(app, protocol="wsgi", client=("203.0.113.9", 51000))
+```
+
+That is how you check that an untrusted client cannot spoof `X-Forwarded-For`
+into someone else's rate-limit bucket.
+
 ## Reading responses
 
 ```python
 response.status_code
 response.json()
 response.text
-response.content                    # bytes
+response.content                    # bytes exactly as sent
+response.body                       # bytes, gunzipped if compressed
 response.headers["content-type"]    # case-insensitive
 response.cookies                    # parsed Set-Cookie
 response.ok                         # 2xx or 3xx
 response.raise_for_status()         # AssertionError with the body, if not ok
 ```
+
+`text` and `json()` read from `body`, so they transparently un-gzip — a test
+about a JSON payload does not have to know whether `GZipMiddleware` is
+installed. Use `content` when the encoding itself is the point.
 
 ## Cookies and sessions
 
