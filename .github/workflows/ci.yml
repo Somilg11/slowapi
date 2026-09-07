@@ -106,7 +106,7 @@ jobs:
           python -m slowapi new smoke-svc --template api
           cd smoke-svc && python -m pytest -q
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: coverage
           path: coverage.xml
@@ -179,7 +179,7 @@ jobs:
       - run: pip install build twine
       - run: python -m build
       - run: twine check dist/*
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist/
