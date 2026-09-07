@@ -17,6 +17,8 @@ import hashlib
 import typing as t
 from pathlib import Path
 
+from mkdocs.exceptions import PluginError
+
 
 def _fingerprint(docs_dir: Path, entry: t.Any) -> t.Any:
     # Non-string entries are mkdocs' richer script objects; a remote URL or an
@@ -28,7 +30,16 @@ def _fingerprint(docs_dir: Path, entry: t.Any) -> t.Any:
 
     path = docs_dir / entry
     if not path.is_file():
-        return entry
+        # Refusing here is the whole point. mkdocs does not validate extra_css
+        # or extra_javascript paths -- not even under --strict -- so a typo or a
+        # renamed file produces a page that links a stylesheet returning 404,
+        # builds green, and deploys unstyled. This hook is the only thing in the
+        # pipeline positioned to notice, so it must not shrug.
+        raise PluginError(
+            f"{entry!r} is listed in the site configuration but does not exist "
+            f"at {path}. mkdocs will happily build a page that links it and "
+            f"returns 404; fix the path or remove the entry."
+        )
 
     digest = hashlib.sha256(path.read_bytes()).hexdigest()[:8]
     return f"{entry}?h={digest}"
