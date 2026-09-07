@@ -23,6 +23,7 @@ from __future__ import annotations
 import asyncio
 import inspect
 import typing as t
+import weakref
 
 from ..concurrency import is_async_callable, maybe_await, run_in_threadpool
 from ..exceptions import ConfigurationError
@@ -124,15 +125,66 @@ def middleware_target(fn: t.Any) -> t.Callable[..., t.Any]:
 
 
 def is_async_middleware(fn: t.Any) -> bool:
-    return is_async_callable(middleware_target(fn))
+    return middleware_shape(fn)[2]
+
+
+class _Shape(t.NamedTuple):
+    """Everything about a middleware decidable without a request.
+
+    ``attr`` names the attribute holding the implementation rather than the
+    bound method itself: a bound method keeps its instance alive, and storing
+    one as the *value* of a weak-keyed cache would pin the key forever.
+    """
+
+    attr: str | None
+    arity: int
+    is_async: bool
+
+
+#: Shape is a pure function of the middleware object, but computing it costs an
+#: ``inspect.signature`` call -- which measured at a third of the per-request
+#: cost of an otherwise empty async pipeline.  Middleware objects outlive the
+#: requests that use them, so the answer is cached against the object itself and
+#: released with it.
+_SHAPES: weakref.WeakKeyDictionary[t.Any, _Shape] = weakref.WeakKeyDictionary()
+
+
+def middleware_shape(fn: t.Any) -> tuple[t.Callable[..., t.Any], int, bool]:
+    """Return ``(target, arity, is_async)`` for ``fn``, cached where possible.
+
+    Objects that cannot be hashed or weak-referenced skip the cache and pay
+    full price; correctness never depends on the cache being usable.
+    """
+    try:
+        shape = _SHAPES.get(fn)
+    except TypeError:  # unhashable middleware
+        shape = None
+        cacheable = False
+    else:
+        cacheable = True
+
+    if shape is None:
+        target = middleware_target(fn)
+        shape = _Shape(
+            None if target is fn else "dispatch",
+            _arity(fn),
+            is_async_callable(target),
+        )
+        if cacheable:
+            try:
+                _SHAPES[fn] = shape
+            except TypeError:  # not weak-referenceable
+                pass
+
+    target = fn if shape.attr is None else getattr(fn, shape.attr)
+    return target, shape.arity, shape.is_async
 
 
 def adapt(
     fn: t.Any, executor: Executor, loop: asyncio.AbstractEventLoop | None = None
 ) -> t.Callable[[Request, Response, Terminal], t.Awaitable[t.Any]]:
     """Normalise any accepted middleware spelling into one async signature."""
-    target = middleware_target(fn)
-    arity = _arity(fn)
+    target, arity, target_is_async = middleware_shape(fn)
 
     if arity == 2:
 
@@ -148,7 +200,7 @@ def adapt(
             f"(req, res, next); it takes {arity} positional parameter(s)."
         )
 
-    if is_async_callable(target):
+    if target_is_async:
 
         async def async_mw(request: Request, response: Response, call_next: Terminal) -> t.Any:
             return await target(request, response, call_next)

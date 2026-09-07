@@ -497,6 +497,22 @@ class SlowAPI:
         self._prepared[id(route)] = plan
         return plan
 
+    def match_request(self, request: Request) -> tuple[Route, dict[str, t.Any]]:
+        """Match ``request`` against the router, at most once per request.
+
+        The adapter matches early to pick an executor and the terminal matches
+        again to dispatch; without memoisation every request routes twice.  The
+        cache is keyed on the method and path that produced it, so middleware
+        that rewrites either one correctly re-matches.
+        """
+        key = (request.method, request.path)
+        cached = request.scope.get("_route_match")
+        if cached is not None and cached[0] == key:
+            return cached[1], cached[2]
+        route, params = self.router.match(request.method, request.path)
+        request.scope["_route_match"] = (key, route, params)
+        return route, params
+
     async def dispatch(
         self,
         request: Request,
@@ -508,7 +524,7 @@ class SlowAPI:
         response._templates = self._templates
 
         async def terminal() -> t.Any:
-            route, path_params = self.router.match(request.method, request.path)
+            route, path_params = self.match_request(request)
             request.path_params.update(path_params)
             request.scope["route"] = route
             plan = self._prepare(route)
