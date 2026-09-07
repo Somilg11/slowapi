@@ -26,7 +26,7 @@ def create_user():
 
 ```python
 # SlowAPI
-from slowapi import SlowAPI
+from slowfw import SlowAPI
 
 app = SlowAPI()
 
@@ -82,7 +82,7 @@ async def read_item(item_id: int, q: str = Query(None), db=Depends(get_db)):
 
 ```python
 # SlowAPI
-from slowapi import Depends, NotFound, Query, SlowAPI
+from slowfw import Depends, NotFound, Query, SlowAPI
 
 app = SlowAPI()
 

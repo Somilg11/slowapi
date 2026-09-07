@@ -9,7 +9,7 @@ on which server is running.
 Three ways, all equivalent:
 
 ```python
-from slowapi import Request
+from slowfw import Request
 
 
 @app.get("/a")
@@ -50,7 +50,7 @@ def inspect(req, res):
 the request came through a hop you declared trusted:
 
 ```python
-from slowapi.middleware import ProxyHeadersMiddleware
+from slowfw.middleware import ProxyHeadersMiddleware
 
 app.use(ProxyHeadersMiddleware(trusted_hosts=["10.0.0.0/8"]))
 ```
@@ -192,7 +192,7 @@ app = SlowAPI(max_body_size=64 * 1024 * 1024)
 ## File uploads
 
 ```python
-from slowapi import File, UploadFile
+from slowfw import File, UploadFile
 
 
 @app.post("/upload")

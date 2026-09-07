@@ -6,8 +6,8 @@ from dataclasses import dataclass
 
 import pytest
 
-from slowapi import Body, Cookie, Depends, Header, Query, SlowAPI, UploadFile
-from slowapi.params import File
+from slowfw import Body, Cookie, Depends, Header, Query, SlowAPI, UploadFile
+from slowfw.params import File
 
 
 @dataclass

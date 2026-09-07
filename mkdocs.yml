@@ -79,7 +79,7 @@ hooks:
   - scripts/mkdocs_cachebust.py
 
 extra_css:
-  - assets/slowapi.css
+  - assets/slowfw.css
 
 extra:
   social:

@@ -12,9 +12,9 @@ from dataclasses import dataclass
 
 import pytest
 
-from slowapi import SlowAPI
-from slowapi.concurrency import _LoopThread, shutdown_loop_thread
-from slowapi.testing import TestClient
+from slowfw import SlowAPI
+from slowfw.concurrency import _LoopThread, shutdown_loop_thread
+from slowfw.testing import TestClient
 
 
 @dataclass

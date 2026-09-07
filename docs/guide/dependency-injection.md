@@ -20,7 +20,7 @@ A dependency is any callable. Its own parameters are resolved the same way a
 handler's are, recursively.
 
 ```python
-from slowapi import Depends, Query
+from slowfw import Depends, Query
 
 
 def pagination(
@@ -101,7 +101,7 @@ anything is injected, so rejecting a request costs nothing.
 ### Providers
 
 ```python
-from slowapi import InjectionToken, Provider, injectable
+from slowfw import InjectionToken, Provider, injectable
 
 
 @injectable()                       # singleton by default
@@ -152,7 +152,7 @@ def audit(auditor: Auditor) -> dict:
 By token, when the annotation is not the token:
 
 ```python
-from slowapi import Inject
+from slowfw import Inject
 
 
 class UserService:

@@ -2,7 +2,7 @@
 
 ```bash
 pip install slowapi-framework
-python -m slowapi run main:app
+python -m slowfw run main:app
 ```
 
 Then:

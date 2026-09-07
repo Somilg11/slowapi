@@ -4,7 +4,7 @@ This is the same service as ``rest-api/`` reorganised for a team. The routes
 are identical; what changes is that each feature owns its providers, its
 authorisation policy, and its boundary.
 
-    python -m slowapi run main:app
+    python -m slowfw run main:app
 """
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ import itertools
 import typing as t
 from dataclasses import dataclass, field
 
-from slowapi import (
+from slowfw import (
     Delete,
     ExecutionContext,
     Get,
@@ -37,8 +37,8 @@ from slowapi import (
     use_guards,
     use_interceptors,
 )
-from slowapi.interceptors import Interceptor, TimingInterceptor
-from slowapi.middleware import AccessLogMiddleware, SecurityHeadersMiddleware
+from slowfw.interceptors import Interceptor, TimingInterceptor
+from slowfw.middleware import AccessLogMiddleware, SecurityHeadersMiddleware
 
 # Tokens let a module publish a value without exporting a class.
 SETTINGS = InjectionToken("SETTINGS", "Runtime configuration")

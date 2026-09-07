@@ -21,8 +21,8 @@ import time
 import typing as t
 from dataclasses import dataclass
 
-from slowapi import Query, SlowAPI, StreamingResponse
-from slowapi.middleware import AccessLogMiddleware
+from slowfw import Query, SlowAPI, StreamingResponse
+from slowfw.middleware import AccessLogMiddleware
 
 app = SlowAPI(title="Streaming", version="1.0.0")
 app.use(AccessLogMiddleware(slow_ms=5000))

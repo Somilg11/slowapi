@@ -47,8 +47,8 @@ try:
 except ModuleNotFoundError:  # pragma: no cover - depends on the environment
     sys.exit("FastAPI is not installed. Run: pip install fastapi")
 
-from slowapi import Query, SlowAPI
-from slowapi.logging import configure_logging
+from slowfw import Query, SlowAPI
+from slowfw.logging import configure_logging
 
 configure_logging("CRITICAL")
 

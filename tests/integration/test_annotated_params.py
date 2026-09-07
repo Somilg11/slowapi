@@ -11,7 +11,7 @@ from typing import Annotated
 
 import pytest
 
-from slowapi import (
+from slowfw import (
     ConfigurationError,
     Cookie,
     Depends,

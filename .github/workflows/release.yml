@@ -26,7 +26,7 @@ jobs:
       - name: Verify the tag matches the package version
         run: |
           TAG="${GITHUB_REF_NAME#v}"
-          PKG=$(python -c "import re,pathlib;print(re.search(r'__version__ = \"([^\"]+)\"', pathlib.Path('src/slowapi/_version.py').read_text()).group(1))")
+          PKG=$(python -c "import re,pathlib;print(re.search(r'__version__ = \"([^\"]+)\"', pathlib.Path('src/slowfw/_version.py').read_text()).group(1))")
           test "$TAG" = "$PKG" || { echo "Tag $TAG != package $PKG"; exit 1; }
 
       - run: pip install build twine

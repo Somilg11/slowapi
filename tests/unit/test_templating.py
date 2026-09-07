@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from slowapi.templating import Markup, TemplateEngine, TemplateError
+from slowfw.templating import Markup, TemplateEngine, TemplateError
 
 
 @pytest.fixture

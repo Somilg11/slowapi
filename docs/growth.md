@@ -319,7 +319,7 @@ protocol for Redis.
 
 **Distributed rate limiting**
 
-A Redis-backed `RateLimitStore` in `slowapi.contrib.redis`, opt-in. The
+A Redis-backed `RateLimitStore` in `slowfw.contrib.redis`, opt-in. The
 protocol already exists; this is a reference implementation so that four
 workers do not silently mean a 4× limit.
 
@@ -453,7 +453,7 @@ Every proposal is judged on five questions, in this order:
 1. **Does it work identically on both protocols?** If not, it is an extension
    with a documented failure mode, or it is not built.
 2. **Does it require a new runtime dependency?** If yes, it belongs in
-   `slowapi.contrib` behind an extra, or outside the project entirely.
+   `slowfw.contrib` behind an extra, or outside the project entirely.
 3. **Can it be analysed at registration?** Per-request reflection is not
    acceptable.
 4. **Is it opt-in?** Existing applications must keep working unchanged.

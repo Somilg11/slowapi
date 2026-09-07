@@ -11,7 +11,7 @@ on one but not the other fails immediately.
 # conftest.py
 import pytest
 
-from slowapi.testing import TestClient
+from slowfw.testing import TestClient
 
 from myapp.main import app
 
@@ -183,7 +183,7 @@ def test_identical_on_both_protocols():
 The performance claim is testable, so test it:
 
 ```python
-from slowapi.concurrency import _LoopThread, shutdown_loop_thread
+from slowfw.concurrency import _LoopThread, shutdown_loop_thread
 
 
 def test_sync_wsgi_never_starts_a_loop():

@@ -16,6 +16,7 @@ The name is not a benchmark claim in either direction. Run `make bench`.
 
 Note that the PyPI name `slowapi` belongs to an unrelated rate-limiting library
 for Starlette. This project publishes as `slowapi-framework` and imports as
+`slowfw`, so both can be installed side by side. The command-line tool is still
 `slowapi`.
 
 ### Why not just use FastAPI?

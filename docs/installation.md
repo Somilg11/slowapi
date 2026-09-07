@@ -5,16 +5,16 @@ pip install slowapi-framework
 ```
 
 That is the whole runtime. SlowAPI has **zero required dependencies** — no
-Pydantic, no Starlette, no `anyio`, no `click`. The import name is `slowapi`:
+Pydantic, no Starlette, no `anyio`, no `click`. The import name is `slowfw`:
 
 ```python
-from slowapi import SlowAPI
+from slowfw import SlowAPI
 ```
 
-> **On the distribution name.** The PyPI name `slowapi` is taken by an
-> unrelated rate-limiting library for Starlette. This project publishes as
-> `slowapi-framework` and imports as `slowapi`. If both are installed in one
-> environment, the import will collide — pick one.
+> **On the names.** The PyPI name `slowapi` is taken by an unrelated
+> rate-limiting library for Starlette. This project publishes as
+> `slowapi-framework` and imports as `slowfw`, so the two can share an
+> environment without colliding. The command-line tool is still `slowapi`.
 
 ## Supported versions
 
@@ -55,8 +55,8 @@ you it did).
 ## Verify the install
 
 ```bash
-python -m slowapi --version
-python -c "import slowapi; print(slowapi.__version__)"
+python -m slowfw --version
+python -c "import slowfw; print(slowfw.__version__)"
 ```
 
 ## From source
@@ -71,10 +71,10 @@ make check       # lint, types, and the full test suite
 ## Scaffold a project
 
 ```bash
-python -m slowapi new my-service
+python -m slowfw new my-service
 cd my-service
 pip install -r requirements.txt
-python -m slowapi run main:app --reload
+python -m slowfw run main:app --reload
 ```
 
 The generated project has a health endpoint, a non-root Dockerfile, a `.env`

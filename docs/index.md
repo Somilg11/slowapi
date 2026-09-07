@@ -25,7 +25,7 @@ structure — and zero required runtime dependencies.</p>
 ## The whole idea, in one file
 
 ```python
-from slowapi import SlowAPI
+from slowfw import SlowAPI
 
 app = SlowAPI()
 

@@ -13,7 +13,7 @@ services:
       target: runtime
     image: slowapi/example-api:dev
     command: >
-      python -m slowapi run main:app
+      python -m slowfw run main:app
       --host 0.0.0.0 --port 8000 --server uvicorn --reload
     environment:
       ENVIRONMENT: development

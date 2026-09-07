@@ -9,7 +9,7 @@ Work that must happen, but not before the client gets its response. Declare a
 `BackgroundTasks` parameter and the framework hands you one:
 
 ```python
-from slowapi import BackgroundTasks, Response, SlowAPI
+from slowfw import BackgroundTasks, Response, SlowAPI
 
 app = SlowAPI()
 
@@ -44,7 +44,7 @@ def delete(id: int, res: Response, _: None = Depends(audited)):
 ### What happens when a task fails
 
 The response is already sent, so there is nobody left to return an error to.
-A failing task is logged to `slowapi.background` and the queue continues —
+A failing task is logged to `slowfw.background` and the queue continues —
 one bad task cannot take the others with it.
 
 That is a deliberate trade. If a task must not be lost, it does not belong in a
@@ -64,7 +64,7 @@ Liveness and readiness answer different questions, and giving them the same
 answer is a common way to turn a blip into an outage.
 
 ```python
-from slowapi import HealthCheck, SlowAPI
+from slowfw import HealthCheck, SlowAPI
 
 app = SlowAPI()
 
@@ -126,7 +126,7 @@ up, the worker pool drains, and liveness keeps passing because the process is
 alive. A deadline turns that into a 504 you can alert on.
 
 ```python
-from slowapi.middleware import TimeoutMiddleware
+from slowfw.middleware import TimeoutMiddleware
 
 app.use(TimeoutMiddleware(seconds=10, per_path={"/reports/{id}": 60.0, "/export": None}))
 ```

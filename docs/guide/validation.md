@@ -10,7 +10,7 @@ together.
 ## Declaring parameters
 
 ```python
-from slowapi import Body, Cookie, Header, Path, Query
+from slowfw import Body, Cookie, Header, Path, Query
 
 
 @app.get("/items/{id:int}")
@@ -182,7 +182,7 @@ compatibility. To be strict:
 ```python
 @dataclass
 class StrictPayload:
-    __slowapi_forbid_extra__ = True
+    __slowfw_forbid_extra__ = True
     name: str
 ```
 

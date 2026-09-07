@@ -19,7 +19,7 @@ Express ergonomics · FastAPI typing · NestJS structure — on WSGI **and** ASG
 ---
 
 ```python
-from slowapi import SlowAPI
+from slowfw import SlowAPI
 
 app = SlowAPI()
 
@@ -257,11 +257,12 @@ pip install "slowapi-framework[all]"
 ```
 
 > The PyPI name `slowapi` belongs to an unrelated rate-limiting library. This
-> project publishes as **`slowapi-framework`** and imports as **`slowapi`**.
+> project publishes as **`slowapi-framework`**, imports as **`slowfw`**, and
+> installs a **`slowapi`** command — so the two can share an environment.
 
 ```bash
-python -m slowapi new my-service     # scaffold a deployable project
-cd my-service && python -m slowapi run main:app --reload
+python -m slowfw new my-service     # scaffold a deployable project
+cd my-service && python -m slowfw run main:app --reload
 ```
 
 ---

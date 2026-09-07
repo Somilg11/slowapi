@@ -13,7 +13,7 @@ Stack traces leak file paths, library versions, and sometimes credentials.
 ## Raising
 
 ```python
-from slowapi import BadRequest, Forbidden, NotFound, Unauthorized
+from slowfw import BadRequest, Forbidden, NotFound, Unauthorized
 
 
 @app.get("/users/{id:int}")
@@ -154,7 +154,7 @@ request id. Deliberate `5xx` responses are logged too; `4xx` are not, because
 they are the client's problem and would otherwise drown the log.
 
 ```python
-from slowapi.logging import configure_logging
+from slowfw.logging import configure_logging
 
 configure_logging("INFO", json_output=True, service="api", version="1.4.0")
 ```

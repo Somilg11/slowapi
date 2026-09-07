@@ -12,7 +12,7 @@ import json
 
 import pytest
 
-from slowapi import Response, SlowAPI
+from slowfw import Response, SlowAPI
 
 
 @dataclasses.dataclass
@@ -41,7 +41,7 @@ class TestBodyHandling:
 
         @app.post("/items")
         def create(req, res: Response):
-            from slowapi.concurrency import call_maybe_sync
+            from slowfw.concurrency import call_maybe_sync
 
             return res.json({"size": len(call_maybe_sync(req.body))})
 
@@ -85,7 +85,7 @@ class TestBodyHandling:
 
         @app.post("/login")
         def login(req, res: Response):
-            from slowapi.concurrency import call_maybe_sync
+            from slowfw.concurrency import call_maybe_sync
 
             form = call_maybe_sync(req.form)
             return res.json({"user": form.get("user")})
@@ -297,7 +297,7 @@ class TestContentTypes:
 
         @app.post("/echo")
         def echo(req, res: Response):
-            from slowapi.concurrency import call_maybe_sync
+            from slowfw.concurrency import call_maybe_sync
 
             return res.json(call_maybe_sync(req.json))
 
@@ -357,7 +357,7 @@ class TestValidationCoercion:
         assert detail["loc"] == ["query", "n"]
 
     def test_constraints_are_enforced(self, make_client):
-        from slowapi import Query
+        from slowfw import Query
 
         app = SlowAPI()
 

@@ -12,9 +12,9 @@ import os
 
 import pytest
 
-from slowapi import SlowAPI
-from slowapi.exceptions import ConfigurationError
-from slowapi.static import StaticFiles
+from slowfw import SlowAPI
+from slowfw.exceptions import ConfigurationError
+from slowfw.static import StaticFiles
 
 
 @pytest.fixture

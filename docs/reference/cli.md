@@ -1,7 +1,7 @@
 # Command line
 
 ```bash
-python -m slowapi <command>      # always available
+python -m slowfw <command>      # always available
 slowapi <command>                # after installation, via the entry point
 ```
 

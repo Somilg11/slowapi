@@ -3,8 +3,8 @@
 Server-rendered pages, form posts, flash messages, sessions, static files.
 
 ```bash
-export SECRET_KEY=$(python -m slowapi secret)
-python -m slowapi run main:app --reload
+export SECRET_KEY=$(python -m slowfw secret)
+python -m slowfw run main:app --reload
 open http://localhost:8000
 ```
 

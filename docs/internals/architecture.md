@@ -5,7 +5,7 @@ A map of the codebase and the path a request takes through it.
 ## Module layout
 
 ```
-src/slowapi/
+src/slowfw/
 ├── app.py               # SlowAPI: registration, dispatch, lifecycle
 ├── routing.py           # Route, Router, path compilation, the trie
 ├── request.py           # Request, body readers

@@ -12,8 +12,8 @@ import io
 import json
 import logging
 
-from slowapi import Request, Response, SlowAPI, UploadFile
-from slowapi.logging import JSONFormatter, configure_logging, get_logger
+from slowfw import Request, Response, SlowAPI, UploadFile
+from slowfw.logging import JSONFormatter, configure_logging, get_logger
 
 
 @dataclasses.dataclass
@@ -31,7 +31,7 @@ class TestJSONFormatter:
 
     def _record(self, **extra):
         record = logging.LogRecord(
-            name="slowapi.test",
+            name="slowfw.test",
             level=logging.INFO,
             pathname=__file__,
             lineno=1,
@@ -47,7 +47,7 @@ class TestJSONFormatter:
         payload = self._emit(self._record)
         assert payload["event"] == "something happened"
         assert payload["level"] == "info"
-        assert payload["logger"] == "slowapi.test"
+        assert payload["logger"] == "slowfw.test"
         assert "ts" in payload
 
     def test_service_and_version_are_stamped_when_configured(self):
@@ -89,13 +89,13 @@ class TestJSONFormatter:
 class TestConfiguration:
     def test_a_level_can_be_set_by_name(self):
         configure_logging("WARNING")
-        assert get_logger("slowapi.x").getEffectiveLevel() >= logging.WARNING
+        assert get_logger("slowfw.x").getEffectiveLevel() >= logging.WARNING
         configure_logging("CRITICAL")  # restore the quiet default for the suite
 
     def test_json_mode_produces_parseable_output(self):
         stream = io.StringIO()
         configure_logging("INFO", json_output=True, stream=stream)
-        get_logger("slowapi.test").info("hello", extra={"k": "v"})
+        get_logger("slowfw.test").info("hello", extra={"k": "v"})
 
         payload = json.loads(stream.getvalue().strip().splitlines()[-1])
 
@@ -107,7 +107,7 @@ class TestConfiguration:
         stream = io.StringIO()
         configure_logging("INFO", json_output=True, stream=stream)
         configure_logging("INFO", json_output=True, stream=stream)
-        get_logger("slowapi.test").info("once")
+        get_logger("slowfw.test").info("once")
 
         assert len(stream.getvalue().strip().splitlines()) == 1
         configure_logging("CRITICAL")
@@ -119,7 +119,7 @@ class TestAccessLog:
         not there."""
         app = SlowAPI()
 
-        with caplog.at_level(logging.INFO, logger="slowapi.access"):
+        with caplog.at_level(logging.INFO, logger="slowfw.access"):
             make_client(app).get("/nope")
 
         statuses = [getattr(r, "status", None) for r in caplog.records]
@@ -154,7 +154,7 @@ class TestFileUploads:
 
         @app.post("/upload")
         def upload(avatar: UploadFile, res: Response):
-            from slowapi.concurrency import call_maybe_sync
+            from slowfw.concurrency import call_maybe_sync
 
             content = call_maybe_sync(avatar.read)
             return res.json(

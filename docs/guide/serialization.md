@@ -13,7 +13,7 @@ once on the DTO, and every handler that returns it is shaped the same way.
 from dataclasses import dataclass, field
 from datetime import datetime
 
-from slowapi import expose, hidden
+from slowfw import expose, hidden
 
 
 @dataclass
@@ -58,7 +58,7 @@ response body yourself.
 ## Per-route options
 
 ```python
-from slowapi import serialize_with
+from slowfw import serialize_with
 
 
 @Get("/directory")
@@ -78,7 +78,7 @@ overrides.
 ## Doing it manually
 
 ```python
-from slowapi import serialize
+from slowfw import serialize
 
 payload = serialize(user, groups=("self",), exclude={"balance"})
 ```

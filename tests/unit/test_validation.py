@@ -10,9 +10,9 @@ from enum import Enum
 
 import pytest
 
-from slowapi.exceptions import ValidationError
-from slowapi.params import Query
-from slowapi.validation import FieldError, coerce, json_schema_for, validate_param
+from slowfw.exceptions import ValidationError
+from slowfw.params import Query
+from slowfw.validation import FieldError, coerce, json_schema_for, validate_param
 
 
 class Colour(str, Enum):

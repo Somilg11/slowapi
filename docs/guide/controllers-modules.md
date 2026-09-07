@@ -9,7 +9,7 @@ Nothing here replaces the functional API — the two mix in one application.
 ## Controllers
 
 ```python
-from slowapi import Delete, Get, Patch, Post, controller, http_code
+from slowfw import Delete, Get, Patch, Post, controller, http_code
 
 
 @controller("/users", tags=["users"])
@@ -91,7 +91,7 @@ class ArticleController(ReadOnlyController):
 A module groups controllers, declares providers, and states its boundary.
 
 ```python
-from slowapi import Provider, module
+from slowfw import Provider, module
 
 
 @module(
@@ -159,7 +159,7 @@ src/myapp/
 Each feature directory is self-contained. `main.py` composes them:
 
 ```python
-from slowapi import SlowAPI
+from slowfw import SlowAPI
 
 from myapp.billing.module import BillingModule
 from myapp.core.module import CoreModule

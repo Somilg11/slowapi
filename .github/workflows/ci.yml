@@ -73,8 +73,8 @@ jobs:
       # The zero-dependency promise has to be tested before dev extras land,
       # because afterwards the environment can no longer disprove it.
       - run: pip install .
-      - run: python -c "import slowapi; print(slowapi.__version__)"
-      - run: python -m slowapi --version
+      - run: python -c "import slowfw; print(slowfw.__version__)"
+      - run: python -m slowfw --version
       - name: Every declared dependency must be behind an extra
         run: |
           python - <<'EOF'
@@ -98,12 +98,12 @@ jobs:
         run: |
           for example in examples/*/; do
             if [ -f "$example/main.py" ]; then
-              (cd "$example" && python -m slowapi check main:app)
+              (cd "$example" && python -m slowfw check main:app)
             fi
           done
       - name: A scaffolded project passes its own tests
         run: |
-          python -m slowapi new smoke-svc --template api
+          python -m slowfw new smoke-svc --template api
           cd smoke-svc && python -m pytest -q
 
       - uses: actions/upload-artifact@v4

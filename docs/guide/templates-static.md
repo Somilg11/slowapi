@@ -80,7 +80,7 @@ is greppable in review.
 Values that are already safe HTML can say so:
 
 ```python
-from slowapi.templating import Markup
+from slowfw.templating import Markup
 
 res.render("post", {"body": Markup(markdown_to_html(post.body))})
 ```

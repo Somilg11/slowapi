@@ -7,7 +7,7 @@ validated once at startup rather than the first time a request touches them.
 ## Built-in settings
 
 ```python
-from slowapi.config import Settings
+from slowfw.config import Settings
 
 settings = Settings.load()          # reads .env, then the environment
 ```
@@ -43,7 +43,7 @@ placeholder; in production it refuses to start:
 
 ```
 ConfigurationError: SECRET_KEY must be set in production.
-Generate one with `python -m slowapi secret`.
+Generate one with `python -m slowfw secret`.
 ```
 
 An application that boots with a default signing key is an application whose
@@ -54,7 +54,7 @@ sessions can be forged.
 ```python
 from dataclasses import dataclass, field
 
-from slowapi.config import from_env
+from slowfw.config import from_env
 
 
 @dataclass
@@ -90,7 +90,7 @@ SECRET_KEY=generate-me
 ```
 
 ```python
-from slowapi.config import load_dotenv
+from slowfw.config import load_dotenv
 
 load_dotenv()                       # or Settings.load(), which calls it
 ```
@@ -105,7 +105,7 @@ production.
 Register them as a provider so services can inject them:
 
 ```python
-from slowapi import InjectionToken, Provider, SlowAPI
+from slowfw import InjectionToken, Provider, SlowAPI
 
 SETTINGS = InjectionToken("SETTINGS")
 
@@ -153,7 +153,7 @@ where the value comes from does.
 Generate a strong key:
 
 ```bash
-python -m slowapi secret            # 48 random bytes, URL-safe
+python -m slowfw secret            # 48 random bytes, URL-safe
 ```
 
 Rotate without logging everyone out by keeping the previous key for

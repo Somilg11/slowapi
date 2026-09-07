@@ -11,10 +11,10 @@ import time
 
 import pytest
 
-from slowapi import BackgroundTasks, HealthCheck, Response, SlowAPI
-from slowapi.concurrency import _LoopThread, shutdown_loop_thread
-from slowapi.middleware import TimeoutMiddleware
-from slowapi.testing import TestClient
+from slowfw import BackgroundTasks, HealthCheck, Response, SlowAPI
+from slowfw.concurrency import _LoopThread, shutdown_loop_thread
+from slowfw.middleware import TimeoutMiddleware
+from slowfw.testing import TestClient
 
 
 class TestBackgroundTasks:
@@ -76,7 +76,7 @@ class TestBackgroundTasks:
             tasks.add(done.append, "audited")
             return "ok"
 
-        from slowapi import Depends
+        from slowfw import Depends
 
         @app.get("/x")
         def handler(res: Response, marker: str = Depends(audit)):
@@ -215,7 +215,7 @@ class TestHealthChecks:
         assert make_client(app).get("/readyz").json()["checks"]["database"]["status"] == "ok"
 
     def test_async_probes_run(self):
-        from slowapi.concurrency import run_coroutine_sync
+        from slowfw.concurrency import run_coroutine_sync
 
         health = HealthCheck()
 

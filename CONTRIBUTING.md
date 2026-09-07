@@ -94,7 +94,7 @@ test first and include it.
 Enforced by `ruff` — run `make format` and stop thinking about it. Beyond
 formatting:
 
-**Type-annotate public functions.** `mypy` runs in CI over `src/slowapi`.
+**Type-annotate public functions.** `mypy` runs in CI over `src/slowfw`.
 
 **Write docstrings that say why, not what.** The signature already says what.
 
@@ -134,7 +134,7 @@ raise ConfigurationError(
 ## Project layout
 
 ```
-src/slowapi/          the framework
+src/slowfw/          the framework
 ├── adapters/         the only files that know about WSGI or ASGI
 ├── middleware/       built-in middleware
 tests/unit/           no HTTP; fast
@@ -174,7 +174,7 @@ Points 3 and 4 are not paperwork — they are usually where the design happens.
 ## Releasing (maintainers)
 
 1. Update `CHANGELOG.md`: move `## [Unreleased]` to the new version.
-2. Bump `__version__` in `src/slowapi/_version.py`.
+2. Bump `__version__` in `src/slowfw/_version.py`.
 3. `make check`.
 4. Tag `vX.Y.Z` and push. The release workflow verifies the tag matches the
    package version, builds, and publishes to PyPI via trusted publishing.

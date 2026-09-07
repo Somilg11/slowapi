@@ -23,7 +23,7 @@ request should never cost a database connection.
 A guard answers one question — *may this request proceed?*
 
 ```python
-from slowapi import ExecutionContext, injectable, use_guards
+from slowfw import ExecutionContext, injectable, use_guards
 
 
 @injectable()
@@ -98,7 +98,7 @@ An interceptor wraps the handler call and sees the *return value*, which is
 what separates it from middleware.
 
 ```python
-from slowapi.interceptors import Interceptor
+from slowfw.interceptors import Interceptor
 
 
 class Envelope(Interceptor):
@@ -117,7 +117,7 @@ Interceptors nest: the first registered is outermost.
 ### Built-ins
 
 ```python
-from slowapi.interceptors import CacheInterceptor, EnvelopeInterceptor, TimingInterceptor
+from slowfw.interceptors import CacheInterceptor, EnvelopeInterceptor, TimingInterceptor
 
 @use_interceptors(
     TimingInterceptor(),                 # X-Handler-Time, and request.state.handler_ms
@@ -144,7 +144,7 @@ file downloads and streams are unaffected by an envelope.
 A pipe transforms or validates a single argument, after type coercion.
 
 ```python
-from slowapi.pipes import Pipe, use_pipes
+from slowfw.pipes import Pipe, use_pipes
 
 
 class NormaliseEmail(Pipe):

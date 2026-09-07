@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import pytest
 
-from slowapi import SlowAPI
-from slowapi.exceptions import ConfigurationError
-from slowapi.middleware import (
+from slowfw import SlowAPI
+from slowfw.exceptions import ConfigurationError
+from slowfw.middleware import (
     CORSMiddleware,
     GZipMiddleware,
     ProxyHeadersMiddleware,
@@ -107,7 +107,7 @@ class TestMiddlewareContract:
         def x(res):
             res.text("ok")
 
-        from slowapi.testing import TestClient
+        from slowfw.testing import TestClient
 
         with pytest.raises(ConfigurationError, match="must take"):
             TestClient(app).get("/x")
