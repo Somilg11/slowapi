@@ -15,7 +15,7 @@ from decimal import Decimal
 
 import pytest
 
-from slowapi.validation import FieldError, coerce, dump, is_dto, json_schema_for
+from slowfw.validation import FieldError, coerce, dump, is_dto, json_schema_for
 
 
 class Colour(enum.Enum):
@@ -148,7 +148,7 @@ class TestDataclasses:
         assert person.address.city == "London"
 
     def test_every_missing_field_is_reported_at_once(self):
-        from slowapi.exceptions import ValidationError
+        from slowfw.exceptions import ValidationError
 
         with pytest.raises(ValidationError) as info:
             coerce({}, Person, ("body",))

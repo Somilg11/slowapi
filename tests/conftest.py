@@ -16,9 +16,9 @@ import pytest
 # Allow `pytest` to run from a clean checkout without an editable install.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from slowapi import SlowAPI
-from slowapi.logging import configure_logging
-from slowapi.testing import TestClient
+from slowfw import SlowAPI
+from slowfw.logging import configure_logging
+from slowfw.testing import TestClient
 
 PROTOCOLS = ["wsgi", "asgi"]
 

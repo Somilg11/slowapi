@@ -116,7 +116,7 @@ Group routes and merge them under a prefix:
 
 ```python
 # users/routes.py
-from slowapi import Router
+from slowfw import Router
 
 users = Router(prefix="/users", tags=["users"])
 

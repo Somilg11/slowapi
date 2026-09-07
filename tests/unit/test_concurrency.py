@@ -10,7 +10,7 @@ import asyncio
 
 import pytest
 
-from slowapi.concurrency import (
+from slowfw.concurrency import (
     drive,
     is_async_callable,
     run_coroutine_sync,

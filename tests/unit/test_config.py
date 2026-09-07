@@ -12,8 +12,8 @@ import dataclasses
 
 import pytest
 
-from slowapi.config import Settings, from_env, load_dotenv
-from slowapi.exceptions import ConfigurationError
+from slowfw.config import Settings, from_env, load_dotenv
+from slowfw.exceptions import ConfigurationError
 
 
 @dataclasses.dataclass
@@ -130,7 +130,7 @@ class TestSettings:
         assert not Settings(environment="production", log_json=False).use_json_logs
 
     def test_production_refuses_to_run_without_a_secret(self):
-        with pytest.raises(ConfigurationError, match="python -m slowapi secret"):
+        with pytest.raises(ConfigurationError, match="python -m slowfw secret"):
             Settings(environment="production").require_secret()
 
     def test_development_gets_an_obviously_unsafe_placeholder(self):

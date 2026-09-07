@@ -11,22 +11,22 @@ services:
     build:
       context: .
       target: runtime
-    image: slowapi/example-api:dev
+    image: slowfw/example-api:dev
     command: >
-      python -m slowapi run main:app
+      python -m slowfw run main:app
       --host 0.0.0.0 --port 8000 --server uvicorn --reload
     environment:
       ENVIRONMENT: development
       DEBUG: "true"
       LOG_LEVEL: DEBUG
-      DATABASE_URL: postgresql://slowapi:slowapi@postgres:5432/slowapi
+      DATABASE_URL: postgresql://slowfw:slowfw@postgres:5432/slowfw
       REDIS_URL: redis://redis:6379/0
       SECRET_KEY: development-only-secret-change-me
     ports:
       - "8000:8000"
     volumes:
       # Bind-mount the source so --reload picks up edits without a rebuild.
-      - ./src:/opt/venv/lib/python3.12/site-packages/slowapi_src:ro
+      - ./src:/opt/venv/lib/python3.12/site-packages/slowfw_src:ro
       - ./examples/rest-api:/app
     depends_on:
       postgres:
@@ -46,7 +46,7 @@ services:
     build:
       context: .
       target: runtime
-    image: slowapi/example-api:dev
+    image: slowfw/example-api:dev
     command: >
       gunicorn main:app
       --bind 0.0.0.0:8000 --workers 4 --access-logfile -
@@ -61,15 +61,15 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: slowapi
-      POSTGRES_PASSWORD: slowapi
-      POSTGRES_DB: slowapi
+      POSTGRES_USER: slowfw
+      POSTGRES_PASSWORD: slowfw
+      POSTGRES_DB: slowfw
     ports:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U slowapi"]
+      test: ["CMD-SHELL", "pg_isready -U slowfw"]
       interval: 5s
       timeout: 3s
       retries: 10

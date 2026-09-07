@@ -11,9 +11,9 @@ import logging
 
 import pytest
 
-from slowapi import Response, SlowAPI
-from slowapi.adapters.asgi import ASGIAdapter
-from slowapi.concurrency import run_coroutine_sync
+from slowfw import Response, SlowAPI
+from slowfw.adapters.asgi import ASGIAdapter
+from slowfw.concurrency import run_coroutine_sync
 
 
 def _drive_lifespan(app: SlowAPI, messages: list[dict]) -> list[dict]:
@@ -71,7 +71,7 @@ class TestLifespan:
         assert sent[-1]["type"] == "lifespan.shutdown.failed"
 
     def test_a_broken_route_fails_startup_rather_than_the_first_request(self):
-        from slowapi import Depends
+        from slowfw import Depends
 
         app = SlowAPI()
 
@@ -120,9 +120,9 @@ class _Capture(logging.Handler):
 
 @pytest.fixture
 def access_records():
-    from slowapi.logging import get_logger
+    from slowfw.logging import get_logger
 
-    logger = get_logger("slowapi.access")
+    logger = get_logger("slowfw.access")
     handler = _Capture()
     previous = logger.level
     logger.addHandler(handler)
@@ -136,7 +136,7 @@ def access_records():
 
 class TestAccessLogging:
     def _app(self, **kwargs):
-        from slowapi.middleware import AccessLogMiddleware
+        from slowfw.middleware import AccessLogMiddleware
 
         app = SlowAPI()
         app.use(AccessLogMiddleware(**kwargs))

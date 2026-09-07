@@ -5,12 +5,12 @@ Ten minutes, one file, a working typed service that runs on two protocols.
 ## 1. A first handler
 
 ```bash
-pip install slowapi-framework
+pip install slowfw
 ```
 
 ```python
 # main.py
-from slowapi import SlowAPI
+from slowfw import SlowAPI
 
 app = SlowAPI(title="Quickstart", version="1.0.0")
 
@@ -21,7 +21,7 @@ def index(res):
 ```
 
 ```bash
-python -m slowapi run main:app --reload
+python -m slowfw run main:app --reload
 curl localhost:8000/
 ```
 
@@ -42,7 +42,7 @@ you need control over headers and status; return a value when you do not.
 ## 3. Typed parameters
 
 ```python
-from slowapi import Query
+from slowfw import Query
 
 
 @app.get("/search")
@@ -105,7 +105,7 @@ round trip. (Pydantic models work here too if you prefer them.)
 ```python
 import time
 
-from slowapi.middleware import CORSMiddleware, SecurityHeadersMiddleware
+from slowfw.middleware import CORSMiddleware, SecurityHeadersMiddleware
 
 
 def timing(req, res, next):
@@ -157,7 +157,7 @@ drift from the implementation.
 # test_main.py
 import pytest
 
-from slowapi.testing import TestClient
+from slowfw.testing import TestClient
 
 from main import app
 

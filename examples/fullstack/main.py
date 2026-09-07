@@ -4,7 +4,7 @@ No JavaScript build step, no API client, no JSON. This is the other half of
 what a web framework is for, and it is the half most modern Python frameworks
 quietly stopped supporting well.
 
-    python -m slowapi run main:app --reload
+    python -m slowfw run main:app --reload
 """
 
 from __future__ import annotations
@@ -13,9 +13,9 @@ import itertools
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
-from slowapi import Form, SlowAPI
-from slowapi.config import Settings
-from slowapi.middleware import SecurityHeadersMiddleware, SessionMiddleware
+from slowfw import Form, SlowAPI
+from slowfw.config import Settings
+from slowfw.middleware import SecurityHeadersMiddleware, SessionMiddleware
 
 settings = Settings.load()
 

@@ -10,10 +10,10 @@ import time
 
 import pytest
 
-from slowapi import Response, SlowAPI
-from slowapi.exceptions import SlowAPIError
-from slowapi.middleware.session import COOKIE_LIMIT, Session, SessionMiddleware
-from slowapi.signing import BadSignature, SignatureExpired, Signer
+from slowfw import Response, SlowAPI
+from slowfw.exceptions import SlowAPIError
+from slowfw.middleware.session import COOKIE_LIMIT, Session, SessionMiddleware
+from slowfw.signing import BadSignature, SignatureExpired, Signer
 
 SECRET = "test-secret-not-for-production"
 

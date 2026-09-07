@@ -3,7 +3,7 @@ requires = ["hatchling>=1.24"]
 build-backend = "hatchling.build"
 
 [project]
-name = "slowapi-framework"
+name = "slowfw"
 dynamic = ["version"]
 description = "One handler, two protocols. Express ergonomics, FastAPI typing, NestJS structure - on WSGI and ASGI at the same time."
 readme = "README.md"
@@ -57,20 +57,20 @@ dev = [
 ]
 
 [project.scripts]
-slowapi = "slowapi.__main__:main"
+slowfw = "slowfw.__main__:main"
 
 [project.urls]
-Homepage = "https://github.com/Somilg11/slowapi"
-Documentation = "https://github.com/Somilg11/slowapi/tree/master/docs"
-Source = "https://github.com/Somilg11/slowapi"
-Issues = "https://github.com/Somilg11/slowapi/issues"
-Changelog = "https://github.com/Somilg11/slowapi/blob/master/CHANGELOG.md"
+Homepage = "https://github.com/Somilg11/slowfw"
+Documentation = "https://github.com/Somilg11/slowfw/tree/master/docs"
+Source = "https://github.com/Somilg11/slowfw"
+Issues = "https://github.com/Somilg11/slowfw/issues"
+Changelog = "https://github.com/Somilg11/slowfw/blob/master/CHANGELOG.md"
 
 [tool.hatch.version]
-path = "src/slowapi/_version.py"
+path = "src/slowfw/_version.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/slowapi"]
+packages = ["src/slowfw"]
 
 [tool.hatch.build.targets.sdist]
 include = ["/src", "/tests", "/docs", "/examples", "/README.md", "/LICENSE", "/CHANGELOG.md"]
@@ -86,15 +86,15 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["src/slowapi"]
+source = ["src/slowfw"]
 branch = true
 # `server.py` shells out to uvicorn/gunicorn/wsgiref and `scaffold.py` writes
 # files; both are exercised by the CLI smoke test in CI rather than by pytest,
 # so counting their lines here would only invite a meaningless number.
 omit = [
-    "src/slowapi/__main__.py",
-    "src/slowapi/scaffold.py",
-    "src/slowapi/server.py",
+    "src/slowfw/__main__.py",
+    "src/slowfw/scaffold.py",
+    "src/slowfw/server.py",
 ]
 
 [tool.coverage.report]
@@ -137,11 +137,11 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S", "B011"]
 "examples/*" = ["S", "B"]
-"src/slowapi/templating.py" = ["S307"]  # eval is documented and scoped
+"src/slowfw/templating.py" = ["S307"]  # eval is documented and scoped
 
 [tool.mypy]
 python_version = "3.10"
-files = ["src/slowapi"]
+files = ["src/slowfw"]
 strict = false
 warn_unused_configs = true
 warn_redundant_casts = true

@@ -15,7 +15,7 @@ this table will list a maintained range.
 **Please do not open a public issue.**
 
 Use GitHub's private reporting:
-[Report a vulnerability](https://github.com/Somilg11/slowapi/security/advisories/new)
+[Report a vulnerability](https://github.com/Somilg11/slowfw/security/advisories/new)
 
 Include:
 

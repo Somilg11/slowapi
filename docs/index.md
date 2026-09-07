@@ -25,7 +25,7 @@ structure — and zero required runtime dependencies.</p>
 ## The whole idea, in one file
 
 ```python
-from slowapi import SlowAPI
+from slowfw import SlowAPI
 
 app = SlowAPI()
 
@@ -61,7 +61,7 @@ have to live with in year two.
 
     ---
 
-    `pip install slowapi-framework`. Nothing else is required — every
+    `pip install slowfw`. Nothing else is required — every
     dependency is an opt-in extra.
 
 -   :material-rocket-launch: **[Quickstart](quickstart.md)**

@@ -3,7 +3,7 @@
 A typed CRUD service. Start here if you are coming from FastAPI.
 
 ```bash
-python -m slowapi run main:app --reload
+python -m slowfw run main:app --reload
 ```
 
 ```bash
@@ -29,6 +29,6 @@ curl -X DELETE localhost:8000/tasks/1 -i
   naming outside, no mapping layer.
 
 ```bash
-python -m slowapi routes main:app     # the route table
-python -m slowapi openapi main:app    # the schema, for CI diffing
+python -m slowfw routes main:app     # the route table
+python -m slowfw openapi main:app    # the schema, for CI diffing
 ```

@@ -1,10 +1,10 @@
 site_name: SlowAPI
 site_description: One handler. Two protocols. A Python web framework that is a WSGI application and an ASGI application at the same time.
-site_url: https://somilg11.github.io/slowapi/
+site_url: https://somilg11.github.io/slowfw/
 site_author: Somil Gupta
 
-repo_url: https://github.com/Somilg11/slowapi
-repo_name: Somilg11/slowapi
+repo_url: https://github.com/Somilg11/slowfw
+repo_name: Somilg11/slowfw
 edit_uri: edit/master/docs/
 
 copyright: Released under the MIT licence.
@@ -79,16 +79,16 @@ hooks:
   - scripts/mkdocs_cachebust.py
 
 extra_css:
-  - assets/slowapi.css
+  - assets/slowfw.css
 
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/Somilg11/slowapi
+      link: https://github.com/Somilg11/slowfw
       name: SlowAPI on GitHub
     - icon: fontawesome/brands/python
-      link: https://pypi.org/project/slowapi-framework/
-      name: slowapi-framework on PyPI
+      link: https://pypi.org/project/slowfw/
+      name: slowfw on PyPI
 
 plugins:
   - search
@@ -150,6 +150,6 @@ nav:
       - FAQ: faq.md
   - Project:
       - Why it exists: growth.md
-      - Changelog: https://github.com/Somilg11/slowapi/blob/master/CHANGELOG.md
-      - Contributing: https://github.com/Somilg11/slowapi/blob/master/CONTRIBUTING.md
-      - Security policy: https://github.com/Somilg11/slowapi/blob/master/SECURITY.md
+      - Changelog: https://github.com/Somilg11/slowfw/blob/master/CHANGELOG.md
+      - Contributing: https://github.com/Somilg11/slowfw/blob/master/CONTRIBUTING.md
+      - Security policy: https://github.com/Somilg11/slowfw/blob/master/SECURITY.md

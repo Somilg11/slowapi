@@ -26,7 +26,7 @@ def create_user():
 
 ```python
 # SlowAPI
-from slowapi import SlowAPI
+from slowfw import SlowAPI
 
 app = SlowAPI()
 
@@ -82,7 +82,7 @@ async def read_item(item_id: int, q: str = Query(None), db=Depends(get_db)):
 
 ```python
 # SlowAPI
-from slowapi import Depends, NotFound, Query, SlowAPI
+from slowfw import Depends, NotFound, Query, SlowAPI
 
 app = SlowAPI()
 
@@ -224,7 +224,7 @@ You do not have to move everything at once. SlowAPI is a WSGI application, so
 you can mount it beside an existing one and route by path at the proxy:
 
 ```nginx
-location /v2/ { proxy_pass http://slowapi-service; }
+location /v2/ { proxy_pass http://slowfw-service; }
 location /    { proxy_pass http://legacy-service;  }
 ```
 

@@ -11,16 +11,16 @@ from types import SimpleNamespace
 
 import pytest
 
-from slowapi import BadRequest, Response, SlowAPI
-from slowapi.concurrency import _LoopThread, shutdown_loop_thread
-from slowapi.interceptors import (
+from slowfw import BadRequest, Response, SlowAPI
+from slowfw.concurrency import _LoopThread, shutdown_loop_thread
+from slowfw.interceptors import (
     CacheInterceptor,
     EnvelopeInterceptor,
     Interceptor,
     TimingInterceptor,
     use_interceptors,
 )
-from slowapi.pipes import (
+from slowfw.pipes import (
     ClampPipe,
     DefaultValuePipe,
     LowercasePipe,
@@ -29,7 +29,7 @@ from slowapi.pipes import (
     TrimPipe,
     use_pipes,
 )
-from slowapi.testing import TestClient
+from slowfw.testing import TestClient
 
 
 class TestTimingInterceptor:

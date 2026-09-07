@@ -6,8 +6,8 @@ import json
 
 import pytest
 
-from slowapi.exceptions import ConfigurationError
-from slowapi.response import FileResponse, JSONResponse, Response
+from slowfw.exceptions import ConfigurationError
+from slowfw.response import FileResponse, JSONResponse, Response
 
 
 class TestExpressAPI:
@@ -101,7 +101,7 @@ class TestFileResponse:
         assert response.status_code == 416
 
     def test_missing_file_is_a_404_not_an_oserror(self, tmp_path):
-        from slowapi.exceptions import NotFound
+        from slowfw.exceptions import NotFound
 
         with pytest.raises(NotFound):
             FileResponse(tmp_path / "absent")

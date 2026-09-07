@@ -46,7 +46,7 @@ typecheck: ## Static type check
 validate: ## Analyse every example's routes without starting a server
 	@for example in examples/*/; do \
 		if [ -f "$$example/main.py" ]; then \
-			(cd "$$example" && ../../$(BIN)/python -m slowapi check main:app) || exit 1; \
+			(cd "$$example" && ../../$(BIN)/python -m slowfw check main:app) || exit 1; \
 		fi; \
 	done
 
@@ -75,7 +75,7 @@ docs-serve: ## Serve the documentation site with live reload
 
 .PHONY: openapi
 openapi: ## Regenerate the OpenAPI sample used in the docs
-	$(BIN)/python -m slowapi openapi examples/rest-api/main:app -o docs/reference/openapi-sample.json
+	$(BIN)/python -m slowfw openapi examples/rest-api/main:app -o docs/reference/openapi-sample.json
 
 .PHONY: build
 build: ## Build the sdist and wheel
@@ -90,7 +90,7 @@ clean: ## Remove caches and build artefacts
 
 .PHONY: docker
 docker: ## Build the runtime image
-	docker build -t slowapi/example-api:dev .
+	docker build -t slowfw/example-api:dev .
 
 .PHONY: up
 up: ## Start the local stack

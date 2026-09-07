@@ -122,7 +122,7 @@ For the return-a-value style, or when you want to construct a response
 directly:
 
 ```python
-from slowapi import (
+from slowfw import (
     FileResponse,
     HTMLResponse,
     JSONResponse,

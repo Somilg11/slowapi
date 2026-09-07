@@ -73,13 +73,13 @@ jobs:
       # The zero-dependency promise has to be tested before dev extras land,
       # because afterwards the environment can no longer disprove it.
       - run: pip install .
-      - run: python -c "import slowapi; print(slowapi.__version__)"
-      - run: python -m slowapi --version
+      - run: python -c "import slowfw; print(slowfw.__version__)"
+      - run: python -m slowfw --version
       - name: Every declared dependency must be behind an extra
         run: |
           python - <<'EOF'
           from importlib.metadata import requires
-          required = [r for r in (requires("slowapi-framework") or []) if "extra ==" not in r]
+          required = [r for r in (requires("slowfw") or []) if "extra ==" not in r]
           assert not required, f"unconditional runtime dependencies: {required}"
           print("zero required runtime dependencies: confirmed")
           EOF
@@ -92,18 +92,18 @@ jobs:
       - run: python scripts/check_docs_links.py
       - run: pytest --cov --cov-report=xml
 
-      # `slowapi check` analyses every route without starting a server, which is
+      # `slowfw check` analyses every route without starting a server, which is
       # what makes a broken dependency a red build instead of a rolled-back deploy.
       - name: Every example passes route validation
         run: |
           for example in examples/*/; do
             if [ -f "$example/main.py" ]; then
-              (cd "$example" && python -m slowapi check main:app)
+              (cd "$example" && python -m slowfw check main:app)
             fi
           done
       - name: A scaffolded project passes its own tests
         run: |
-          python -m slowapi new smoke-svc --template api
+          python -m slowfw new smoke-svc --template api
           cd smoke-svc && python -m pytest -q
 
       - uses: actions/upload-artifact@v4

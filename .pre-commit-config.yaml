@@ -27,5 +27,5 @@ repos:
     rev: v1.11.1
     hooks:
       - id: mypy
-        files: ^src/slowapi/
+        files: ^src/slowfw/
         additional_dependencies: []

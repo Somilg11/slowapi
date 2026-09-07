@@ -9,10 +9,10 @@ from __future__ import annotations
 
 import pytest
 
-from slowapi import ConfigurationError, Depends, Response, SlowAPI, never_suspends
-from slowapi.adapters.wsgi import WSGIAdapter
-from slowapi.concurrency import _LoopThread, shutdown_loop_thread
-from slowapi.testing import TestClient
+from slowfw import ConfigurationError, Depends, Response, SlowAPI, never_suspends
+from slowfw.adapters.wsgi import WSGIAdapter
+from slowfw.concurrency import _LoopThread, shutdown_loop_thread
+from slowfw.testing import TestClient
 
 
 def _missing_dependency() -> None:  # pragma: no cover - never called

@@ -1,6 +1,6 @@
 # One maintainer, so one rule. Per-path owners belong here the moment there is
 # more than one person to route a review to -- the dual-protocol core
-# (src/slowapi/adapters/, concurrency.py, app.py) is the part that will want
+# (src/slowfw/adapters/, concurrency.py, app.py) is the part that will want
 # its own reviewer first, because it is the part most easily broken by an
 # innocent-looking change.
 *   @Somilg11

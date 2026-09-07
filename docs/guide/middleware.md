@@ -87,7 +87,7 @@ path. SlowAPI assumes the worst by default, because assuming the worst is safe.
 `@never_suspends` lets you say otherwise:
 
 ```python
-from slowapi import never_suspends
+from slowfw import never_suspends
 
 @never_suspends
 class Timing:
@@ -114,7 +114,7 @@ reason.
 ## Built-in middleware
 
 ```python
-from slowapi.middleware import (
+from slowfw.middleware import (
     AccessLogMiddleware,
     CORSMiddleware,
     GZipMiddleware,

@@ -1,6 +1,6 @@
 # API reference
 
-Every public name, grouped by what it is for. Import everything from `slowapi`
+Every public name, grouped by what it is for. Import everything from `slowfw`
 unless noted.
 
 ## Application
@@ -61,7 +61,7 @@ Router(prefix="", *, middlewares=(), tags=())
 `.include(other, prefix="")`, `.match(method, path)`, `.url_path_for(name, **p)`,
 `.routes`.
 
-From `slowapi.routing`: `Route`, `Convertor`, `CONVERTORS`, `compile_path`,
+From `slowfw.routing`: `Route`, `Convertor`, `CONVERTORS`, `compile_path`,
 `HTTP_METHODS`.
 
 ## Request
@@ -127,14 +127,14 @@ Scopes: `"singleton"`, `"request"`, `"transient"`. Hooks: `on_module_init`,
 ## Guards, interceptors, pipes
 
 `use_guards(*guards)`, `roles(*names)`, `public`, `ExecutionContext`.
-From `slowapi.guards`: `AllowAll`, `DenyAll`, `RequireHeader`.
+From `slowfw.guards`: `AllowAll`, `DenyAll`, `RequireHeader`.
 
 `use_interceptors(*interceptors)`, `Interceptor`.
-From `slowapi.interceptors`: `TimingInterceptor`, `EnvelopeInterceptor`,
+From `slowfw.interceptors`: `TimingInterceptor`, `EnvelopeInterceptor`,
 `CacheInterceptor`.
 
 `use_pipes(*pipes)`, `Pipe`.
-From `slowapi.pipes`: `TrimPipe`, `LowercasePipe`, `ParseIntPipe`,
+From `slowfw.pipes`: `TrimPipe`, `LowercasePipe`, `ParseIntPipe`,
 `DefaultValuePipe`, `ClampPipe`, `NotEmptyPipe`.
 
 `ExecutionContext`: `.request` `.response` `.route` `.container` `.app`
@@ -145,12 +145,12 @@ From `slowapi.pipes`: `TrimPipe`, `LowercasePipe`, `ParseIntPipe`,
 
 `expose(groups=(), alias=None, transform=None)`, `hidden(write_only=True)`,
 `serialize(value, groups=(), include=None, exclude=None, exclude_none=False)`,
-`serialize_with(...)`. From `slowapi.serialization`: `SerializerInterceptor`,
+`serialize_with(...)`. From `slowfw.serialization`: `SerializerInterceptor`,
 `FieldOptions`.
 
 ## Middleware
 
-From `slowapi.middleware`: `CORSMiddleware`, `SecurityHeadersMiddleware`,
+From `slowfw.middleware`: `CORSMiddleware`, `SecurityHeadersMiddleware`,
 `TrustedHostMiddleware`, `GZipMiddleware`, `ProxyHeadersMiddleware`,
 `RateLimitMiddleware`, `MemoryRateLimitStore`, `RateLimitStore`,
 `SessionMiddleware`, `Session`, `RequestIDMiddleware`, `AccessLogMiddleware`,
@@ -170,31 +170,31 @@ From `slowapi.middleware`: `CORSMiddleware`, `SecurityHeadersMiddleware`,
 `Settings`, `Settings.load()`, `from_env(model, prefix="")`,
 `load_dotenv(path=".env", override=False)`.
 
-From `slowapi.logging`: `configure_logging(level, json_output=False,
+From `slowfw.logging`: `configure_logging(level, json_output=False,
 service=None, version=None)`, `get_logger(name)`, `JSONFormatter`,
 `ConsoleFormatter`.
 
 ## Testing
 
-From `slowapi.testing`: `TestClient(app, protocol="wsgi"|"asgi", base_url=...,
+From `slowfw.testing`: `TestClient(app, protocol="wsgi"|"asgi", base_url=...,
 headers=..., follow_cookies=True)`, `TestResponse`.
 
 ## Data structures
 
 `Headers`, `QueryParams`, `UploadFile`, `URL`, `State`.
-From `slowapi.datastructures`: `MultiDict`, `MutableHeaders`, `FormData`,
+From `slowfw.datastructures`: `MultiDict`, `MutableHeaders`, `FormData`,
 `Address`.
 
 ## Concurrency
 
-From `slowapi.concurrency`: `drive(coro)`, `is_async_callable(obj)`,
+From `slowfw.concurrency`: `drive(coro)`, `is_async_callable(obj)`,
 `run_in_threadpool(fn, *a)`, `run_coroutine_sync(coro, loop=None)`,
 `maybe_await(value)`, `call_maybe_async(fn, *a)`, `shutdown_loop_thread()`.
 
 ## Other
 
-`StaticFiles(directory, ...)`, `slowapi.templating.TemplateEngine`,
-`slowapi.templating.Markup`, `slowapi.signing.Signer`,
-`slowapi.validation.coerce/json_schema_for/FieldError`,
-`slowapi.openapi.generate/swagger_html/redoc_html`,
-`slowapi.server.run/detect_server`.
+`StaticFiles(directory, ...)`, `slowfw.templating.TemplateEngine`,
+`slowfw.templating.Markup`, `slowfw.signing.Signer`,
+`slowfw.validation.coerce/json_schema_for/FieldError`,
+`slowfw.openapi.generate/swagger_html/redoc_html`,
+`slowfw.server.run/detect_server`.

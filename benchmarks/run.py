@@ -22,10 +22,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from slowapi import Depends, Query, SlowAPI
-from slowapi.concurrency import _LoopThread, shutdown_loop_thread
-from slowapi.logging import configure_logging
-from slowapi.testing import TestClient
+from slowfw import Depends, Query, SlowAPI
+from slowfw.concurrency import _LoopThread, shutdown_loop_thread
+from slowfw.logging import configure_logging
+from slowfw.testing import TestClient
 
 configure_logging("CRITICAL")
 

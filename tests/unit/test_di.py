@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import pytest
 
-from slowapi.di import Container, InjectionToken, Provider, injectable
-from slowapi.exceptions import ConfigurationError
+from slowfw.di import Container, InjectionToken, Provider, injectable
+from slowfw.exceptions import ConfigurationError
 
 
 def run(coro):
     """Drive a coroutine without pulling in an async test plugin."""
-    from slowapi.concurrency import run_coroutine_sync, shutdown_loop_thread
+    from slowfw.concurrency import run_coroutine_sync, shutdown_loop_thread
 
     try:
         return run_coroutine_sync(coro)

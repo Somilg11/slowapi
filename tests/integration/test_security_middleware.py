@@ -10,8 +10,8 @@ from __future__ import annotations
 
 import pytest
 
-from slowapi import Response, SlowAPI
-from slowapi.middleware import (
+from slowfw import Response, SlowAPI
+from slowfw.middleware import (
     CORSMiddleware,
     GZipMiddleware,
     ProxyHeadersMiddleware,
@@ -38,7 +38,7 @@ class TestProxyHeaders:
     def test_an_untrusted_peer_cannot_rewrite_its_own_address(self):
         """The whole point: otherwise any client picks its own rate-limit bucket."""
         app = _echo_app(ProxyHeadersMiddleware(trusted_hosts=["10.0.0.1"]))
-        from slowapi.testing import TestClient
+        from slowfw.testing import TestClient
 
         client = TestClient(app, protocol="wsgi", client=("203.0.113.9", 5000))
         body = client.get("/x", headers={"x-forwarded-for": "1.2.3.4"}).json()
@@ -46,7 +46,7 @@ class TestProxyHeaders:
         assert body["client"] == "203.0.113.9"
 
     def test_a_trusted_proxy_is_believed(self):
-        from slowapi.testing import TestClient
+        from slowfw.testing import TestClient
 
         app = _echo_app(ProxyHeadersMiddleware(trusted_hosts=["10.0.0.1"]))
         client = TestClient(app, protocol="wsgi", client=("10.0.0.1", 5000))
@@ -59,7 +59,7 @@ class TestProxyHeaders:
         assert body["scheme"] == "https"
 
     def test_a_cidr_range_can_be_trusted(self):
-        from slowapi.testing import TestClient
+        from slowfw.testing import TestClient
 
         app = _echo_app(ProxyHeadersMiddleware(trusted_hosts=["10.0.0.0/8"]))
         client = TestClient(app, protocol="wsgi", client=("10.42.7.1", 5000))
@@ -69,7 +69,7 @@ class TestProxyHeaders:
         )
 
     def test_a_peer_outside_the_range_is_not_trusted(self):
-        from slowapi.testing import TestClient
+        from slowfw.testing import TestClient
 
         app = _echo_app(ProxyHeadersMiddleware(trusted_hosts=["10.0.0.0/8"]))
         client = TestClient(app, protocol="wsgi", client=("192.168.1.1", 5000))
@@ -79,7 +79,7 @@ class TestProxyHeaders:
         )
 
     def test_the_leftmost_hop_is_the_client(self):
-        from slowapi.testing import TestClient
+        from slowfw.testing import TestClient
 
         app = _echo_app(ProxyHeadersMiddleware(trusted_hosts=["*"]))
         client = TestClient(app, protocol="wsgi", client=("10.0.0.1", 5000))
@@ -170,7 +170,7 @@ class TestCORS:
 
     def test_credentials_with_a_wildcard_are_refused_at_construction(self):
         """Browsers reject that pair, so a running app that sends it is broken."""
-        from slowapi.exceptions import ConfigurationError
+        from slowfw.exceptions import ConfigurationError
 
         with pytest.raises(ConfigurationError, match="List the origins explicitly"):
             CORSMiddleware(allow_origins=["*"], allow_credentials=True)
@@ -339,7 +339,7 @@ class TestExceptionHandlerArgumentOrder:
         assert make_client(self._app_with(handle)).get("/boom").json()["detail"] == "expected"
 
     def test_annotations_settle_it_regardless_of_name(self, make_client):
-        from slowapi import Request
+        from slowfw import Request
 
         def handle(a: Response, b: ValueError, c: Request):
             return a.status(418).json({"detail": str(b), "path": c.path})

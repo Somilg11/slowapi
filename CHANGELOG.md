@@ -7,10 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — BREAKING: the project is now `slowfw` everywhere
+
+`slowapi` on PyPI is a rate-limiting extension for Starlette and FastAPI,
+published since 2021, sitting in exactly the ecosystem this framework targets.
+The distribution was already named `slowapi-framework` to avoid it, but the
+package it installed was top-level `slowapi` — the same top-level name. Both
+installed together put two distributions' files in one directory: one silently
+overwrites the other, and uninstalling either damages both.
+
+Rather than keep three names for one project, everything is now `slowfw`:
+
+| | Was | Is |
+| --- | --- | --- |
+| Distribution | `slowapi-framework` | `slowfw` |
+| Import | `slowapi` | `slowfw` |
+| Command | `slowapi` | `slowfw` |
+| Repository | `Somilg11/slowapi` | `Somilg11/slowfw` |
+
+`from slowapi import SlowAPI` becomes `from slowfw import SlowAPI`; the
+`SlowAPI` class keeps its name. Verified in one environment with both packages
+installed: `import slowapi` resolves to the rate limiter, `import slowfw` to
+this project.
+
+Nothing had been published, so this cost one commit. After a first upload it
+would have been permanent — PyPI never releases a name, and moving an import
+breaks every installation.
+
+Three defects surfaced while doing it, none caused by the rename:
+
+- A scaffolded project's `requirements.txt` pinned `slowapi` — the rate
+  limiter. Every project `slowapi new` generated installed the wrong package
+  and could never have run.
+- The Jinja2 install hint said `pip install slowapi[templates]`, an extra that
+  does not exist on that distribution.
+- The logger tree was rooted at `slowapi` while its children were `slowapi.*`
+  being renamed, which would have orphaned every child logger and silently
+  disabled `configure_logging`.
+
 ### Added
 
 - A documentation site, built from the same Markdown the repository already
-  contained, at <https://somilg11.github.io/slowapi/>. `make docs-serve` runs it
+  contained, at <https://somilg11.github.io/slowfw/>. `make docs-serve` runs it
   locally. The build is `--strict`, so a broken link, a dead anchor or an
   orphaned page fails rather than ships -- which immediately found two dead
   anchors and four links that resolved when browsing the repository but not on
@@ -40,7 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   overrides and `None` to exempt a route. The documentation is explicit about
   what a deadline can enforce on the sync path, where nothing can pre-empt a
   running function.
-- `SlowAPI.check()` and `slowapi check module:app`: analyse every route without
+- `SlowAPI.check()` and `slowfw check module:app`: analyse every route without
   starting a server. Runs automatically during startup, so a broken route now
   fails the process rather than the first request; the CLI form moves the
   discovery to a red build. Every broken route is reported, not just the first.
@@ -221,5 +259,5 @@ the Express `(req, res, next)` contract.
   methods, `functools.partial`, and callable objects.
 - No `Content-Length` was ever set.
 
-[Unreleased]: https://github.com/Somilg11/slowapi/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/Somilg11/slowapi/releases/tag/v0.1.0
+[Unreleased]: https://github.com/Somilg11/slowfw/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/Somilg11/slowfw/releases/tag/v0.1.0

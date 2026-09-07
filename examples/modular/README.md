@@ -3,7 +3,7 @@
 The same API as `rest-api/`, organised the way a team of ten would want it.
 
 ```bash
-python -m slowapi run main:app
+python -m slowfw run main:app
 ```
 
 ```bash

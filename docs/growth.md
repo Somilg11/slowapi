@@ -319,7 +319,7 @@ protocol for Redis.
 
 **Distributed rate limiting**
 
-A Redis-backed `RateLimitStore` in `slowapi.contrib.redis`, opt-in. The
+A Redis-backed `RateLimitStore` in `slowfw.contrib.redis`, opt-in. The
 protocol already exists; this is a reference implementation so that four
 workers do not silently mean a 4× limit.
 
@@ -383,7 +383,7 @@ media-type versioning need router support and correct OpenAPI output.
 **Schema-diff tooling**
 
 ```bash
-slowapi openapi-diff main:app --against openapi.json --fail-on breaking
+slowfw openapi-diff main:app --against openapi.json --fail-on breaking
 ```
 
 *Problem:* the OpenAPI document is generated, so breaking changes are
@@ -393,7 +393,7 @@ large payoff.
 **A dependency graph visualiser**
 
 ```bash
-slowapi graph main:app --format mermaid
+slowfw graph main:app --format mermaid
 ```
 
 *Problem:* on a large application, "what does this module actually depend on"
@@ -424,7 +424,7 @@ exposes stream-level control, there may be a framework-level story.
 **A typed client generator.**
 
 ```bash
-slowapi client main:app --output client.py
+slowfw client main:app --output client.py
 ```
 
 The OpenAPI document is generated from real annotations, so a fully typed
@@ -453,7 +453,7 @@ Every proposal is judged on five questions, in this order:
 1. **Does it work identically on both protocols?** If not, it is an extension
    with a documented failure mode, or it is not built.
 2. **Does it require a new runtime dependency?** If yes, it belongs in
-   `slowapi.contrib` behind an extra, or outside the project entirely.
+   `slowfw.contrib` behind an extra, or outside the project entirely.
 3. **Can it be analysed at registration?** Per-request reflection is not
    acceptable.
 4. **Is it opt-in?** Existing applications must keep working unchanged.
@@ -486,11 +486,11 @@ Not stars, and not benchmark position.
 
 The roadmap is a proposal, not a contract. Concrete arguments beat votes.
 
-- Open a [discussion](https://github.com/Somilg11/slowapi/discussions) for
+- Open a [discussion](https://github.com/Somilg11/slowfw/discussions) for
   direction.
-- Open an [issue](https://github.com/Somilg11/slowapi/issues) for a specific
+- Open an [issue](https://github.com/Somilg11/slowfw/issues) for a specific
   proposal, and describe the situation you are in rather than the API you want.
-- Read [CONTRIBUTING.md](https://github.com/Somilg11/slowapi/blob/master/CONTRIBUTING.md) before opening a pull request.
+- Read [CONTRIBUTING.md](https://github.com/Somilg11/slowfw/blob/master/CONTRIBUTING.md) before opening a pull request.
 
 The most valuable contribution is not a feature. It is a report of the shape
 *"I tried to do X and the framework made it hard, and here is what I did

@@ -31,7 +31,7 @@ assert a.status_code == b.status_code and a.content == b.content
 The core installs with nothing, and CI proves it on every commit. If your
 feature needs a library:
 
-- Put it in `slowapi/contrib/` behind an optional extra, import it lazily, and
+- Put it in `slowfw/contrib/` behind an optional extra, import it lazily, and
   raise a clear error when it is missing; **or**
 - Implement the capability with the standard library; **or**
 - Make the case in an issue first. It has to be a strong one.
@@ -39,7 +39,7 @@ feature needs a library:
 ## Getting set up
 
 ```bash
-git clone https://github.com/Somilg11/slowapi && cd slowapi
+git clone https://github.com/Somilg11/slowfw && cd slowfw
 make install          # .venv with -e ".[dev,all]"
 make check            # lint + types + tests, exactly what CI runs
 ```
@@ -94,7 +94,7 @@ test first and include it.
 Enforced by `ruff` — run `make format` and stop thinking about it. Beyond
 formatting:
 
-**Type-annotate public functions.** `mypy` runs in CI over `src/slowapi`.
+**Type-annotate public functions.** `mypy` runs in CI over `src/slowfw`.
 
 **Write docstrings that say why, not what.** The signature already says what.
 
@@ -134,7 +134,7 @@ raise ConfigurationError(
 ## Project layout
 
 ```
-src/slowapi/          the framework
+src/slowfw/          the framework
 ├── adapters/         the only files that know about WSGI or ASGI
 ├── middleware/       built-in middleware
 tests/unit/           no HTTP; fast
@@ -174,7 +174,7 @@ Points 3 and 4 are not paperwork — they are usually where the design happens.
 ## Releasing (maintainers)
 
 1. Update `CHANGELOG.md`: move `## [Unreleased]` to the new version.
-2. Bump `__version__` in `src/slowapi/_version.py`.
+2. Bump `__version__` in `src/slowfw/_version.py`.
 3. `make check`.
 4. Tag `vX.Y.Z` and push. The release workflow verifies the tag matches the
    package version, builds, and publishes to PyPI via trusted publishing.

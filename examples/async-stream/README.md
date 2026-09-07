@@ -1,7 +1,7 @@
 # async-stream
 
 ```bash
-pip install "slowapi-framework[asgi]"
+pip install "slowfw[asgi]"
 uvicorn main:app
 ```
 

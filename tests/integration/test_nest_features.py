@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 
 import pytest
 
-from slowapi import (
+from slowfw import (
     ExecutionContext,
     Get,
     Inject,
@@ -27,9 +27,9 @@ from slowapi import (
     use_interceptors,
     use_pipes,
 )
-from slowapi.exceptions import ConfigurationError
-from slowapi.interceptors import EnvelopeInterceptor, Interceptor
-from slowapi.pipes import ClampPipe, TrimPipe
+from slowfw.exceptions import ConfigurationError
+from slowfw.interceptors import EnvelopeInterceptor, Interceptor
+from slowfw.pipes import ClampPipe, TrimPipe
 
 SETTINGS = InjectionToken("SETTINGS")
 

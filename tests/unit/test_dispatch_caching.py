@@ -12,9 +12,9 @@ import weakref
 
 import pytest
 
-from slowapi import SlowAPI
-from slowapi.middleware.base import _SHAPES, middleware_shape
-from slowapi.testing import TestClient
+from slowfw import SlowAPI
+from slowfw.middleware.base import _SHAPES, middleware_shape
+from slowfw.testing import TestClient
 
 
 class DispatchMiddleware:

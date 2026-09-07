@@ -8,14 +8,14 @@ Three handlers, written three different ways, all in one app:
 
 Run it either way and compare:
 
-    python -m slowapi run main:app          # picks the best server installed
+    python -m slowfw run main:app          # picks the best server installed
     gunicorn main:app --workers 4           # WSGI
     uvicorn  main:app                       # ASGI
 """
 
 import asyncio
 
-from slowapi import SlowAPI
+from slowfw import SlowAPI
 
 app = SlowAPI(title="Hello", version="1.0.0")
 

@@ -4,7 +4,7 @@ Shows the FastAPI half of SlowAPI: dataclass DTOs, validated parameters,
 dependency injection, structured errors, and an OpenAPI document generated
 from the same annotations that enforce the rules at runtime.
 
-    python -m slowapi run main:app --reload
+    python -m slowfw run main:app --reload
     open http://localhost:8000/docs
 """
 
@@ -14,8 +14,8 @@ import itertools
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
-from slowapi import Depends, Header, NotFound, Query, SlowAPI, expose, hidden
-from slowapi.middleware import (
+from slowfw import Depends, Header, NotFound, Query, SlowAPI, expose, hidden
+from slowfw.middleware import (
     AccessLogMiddleware,
     CORSMiddleware,
     GZipMiddleware,

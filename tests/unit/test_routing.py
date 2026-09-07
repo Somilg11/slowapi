@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from slowapi.exceptions import ConfigurationError, MethodNotAllowed, NotFound
-from slowapi.routing import Route, Router, compile_path
+from slowfw.exceptions import ConfigurationError, MethodNotAllowed, NotFound
+from slowfw.routing import Route, Router, compile_path
 
 
 def handler() -> None:  # pragma: no cover - never invoked
