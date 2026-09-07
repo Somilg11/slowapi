@@ -72,6 +72,12 @@ theme:
     - content.tabs.link
     - content.action.edit
 
+# Content-hashes extra_css and extra_javascript. Without it a browser holding
+# the previous stylesheet keeps serving it after a deploy, which reads as "the
+# theme did not update".
+hooks:
+  - scripts/mkdocs_cachebust.py
+
 extra_css:
   - assets/slowapi.css
 
