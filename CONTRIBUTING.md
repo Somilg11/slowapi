@@ -179,6 +179,26 @@ Points 3 and 4 are not paperwork — they are usually where the design happens.
 4. Tag `vX.Y.Z` and push. The release workflow verifies the tag matches the
    package version, builds, and publishes to PyPI via trusted publishing.
 
+## Dependency updates and notification noise
+
+Dependabot is configured in `.github/dependabot.yml` for quiet rather than
+currency: monthly, one grouped pull request per ecosystem, a limit of one open
+at a time, and major bumps ignored. Security updates are deliberately left out
+of that file — they are a separate always-on repository setting, and they are
+the alerts worth receiving.
+
+That file controls how many pull requests appear. It cannot control whether you
+are emailed about them, because notification delivery is a per-account setting.
+If Dependabot is filling your inbox, the two switches are:
+
+- **Repository → Watch → Custom**, and untick *Pull requests*. You keep releases
+  and issues; you stop hearing about every bump.
+- **<https://github.com/settings/notifications>**, under *Dependabot alerts*,
+  untick **Email**. Alerts still appear in the security tab and in the web
+  notification inbox.
+
+Neither is in this repository, so neither can be changed by a pull request.
+
 ## Code of conduct
 
 By participating you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).

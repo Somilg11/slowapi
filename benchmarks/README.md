@@ -49,10 +49,10 @@ per-request overhead:
 
 | route | FastAPI (ASGI) | SlowAPI (ASGI) | SlowAPI (WSGI) |
 | --- | --- | --- | --- |
-| plain text | 145.6µs | 60.4µs | **17.4µs** |
-| json dict | 148.1µs | 68.8µs | **23.2µs** |
-| path + query validated | 172.8µs | 78.7µs | **33.2µs** |
-| async json | **16.1µs** | 17.4µs | n/a |
+| plain text | 154.1µs | 63.3µs | **17.8µs** |
+| json dict | 155.8µs | 68.7µs | **22.8µs** |
+| path + query validated | 175.5µs | 78.1µs | **32.8µs** |
+| async json | **15.6µs** | 17.2µs | n/a |
 
 Read it as one result, not four: **the gap is the thread hop, not the
 framework.** A `def` handler under ASGI must be offloaded to a worker thread so

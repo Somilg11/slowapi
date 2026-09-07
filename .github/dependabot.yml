@@ -1,20 +1,59 @@
+# Tuned for quiet, not for currency.
+#
+# This project has zero required runtime dependencies, so a routine version
+# bump is almost never urgent -- but every pull request Dependabot opens is an
+# email. The settings below trade freshness for silence:
+#
+#   * monthly rather than weekly, the least frequent interval Dependabot offers
+#   * one grouped pull request per ecosystem instead of one per package
+#   * a limit of 1, so nothing can pile up while you are not looking
+#   * major bumps ignored, because those need reading, not merging, and are
+#     better raised deliberately than delivered on a schedule
+#
+# Security updates are NOT configured here. They are a separate, always-on
+# repository setting and are deliberately left alone: those are the alerts
+# worth receiving.
+#
+# Note that this file cannot stop email on its own. Notification delivery is a
+# per-account setting -- see CONTRIBUTING.md.
 version: 2
 updates:
   - package-ecosystem: pip
     directory: "/"
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
+      interval: monthly
+    open-pull-requests-limit: 1
     groups:
-      dev-dependencies:
-        patterns: ["pytest*", "ruff", "mypy"]
+      python:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: "chore"
 
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
       interval: monthly
+    open-pull-requests-limit: 1
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore"
 
   - package-ecosystem: docker
     directory: "/"
     schedule:
       interval: monthly
+    open-pull-requests-limit: 1
+    groups:
+      docker:
+        patterns: ["*"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: "chore"

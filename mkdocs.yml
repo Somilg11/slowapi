@@ -30,7 +30,12 @@ theme:
   icon:
     repo: fontawesome/brands/github
   palette:
+    # The "follow the system" entry needs the custom primary and accent too:
+    # without them Material falls back to its default indigo, which is what
+    # most visitors would see, because following the system is the default.
     - media: "(prefers-color-scheme)"
+      primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-auto
         name: Follow the system theme
@@ -49,8 +54,8 @@ theme:
         icon: material/brightness-4
         name: Switch to light
   font:
-    text: Inter
-    code: JetBrains Mono
+    text: Geist
+    code: Geist Mono
   features:
     - navigation.instant
     - navigation.instant.progress

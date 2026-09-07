@@ -1,7 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" role="img" aria-label="SlowAPI">
   <title>SlowAPI</title>
-  <!-- Two protocols entering, one handler leaving. -->
-  <path d="M3 6.5C12 6.5 11 16 20 16" stroke="#2dd4bf" stroke-width="3.4" stroke-linecap="round"/>
-  <path d="M3 25.5C12 25.5 11 16 20 16" stroke="#fbbf24" stroke-width="3.4" stroke-linecap="round"/>
+  <!-- Two protocols entering, one handler leaving. Told apart by weight, not
+       by colour, so the mark survives being printed or inverted. -->
+  <path d="M3 6.5C12 6.5 11 16 20 16" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/>
+  <path d="M3 25.5C12 25.5 11 16 20 16" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" opacity="0.45"/>
   <circle cx="24.6" cy="16" r="4" fill="currentColor"/>
 </svg>

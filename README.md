@@ -10,7 +10,7 @@ Express ergonomics · FastAPI typing · NestJS structure — on WSGI **and** ASG
 [![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12%20|%203.13%20|%203.14-blue)](https://pypi.org/project/slowapi-framework/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Dependencies](https://img.shields.io/badge/runtime%20dependencies-0-brightgreen)](pyproject.toml)
-[![Docs](https://img.shields.io/badge/docs-somilg11.github.io%2Fslowapi-0f766e)](https://somilg11.github.io/slowapi/)
+[![Docs](https://img.shields.io/badge/docs-somilg11.github.io%2Fslowapi-000000)](https://somilg11.github.io/slowapi/)
 
 **[Documentation](https://somilg11.github.io/slowapi/)** · [Quickstart](docs/quickstart.md) · [Guide](docs/README.md) · [Why it exists](docs/growth.md) · [How it works](docs/internals/dual-protocol.md)
 
@@ -306,28 +306,53 @@ what remains yours.
 ## Performance
 
 `make bench` — in-process through the real adapters, so this includes building
-the request rather than only dispatch. M-series laptop, 3000 iterations:
+the request rather than only dispatch. M-series laptop, Python 3.14, median of
+20,000 iterations, best of three runs:
 
 | Route | WSGI | ASGI |
 | --- | --- | --- |
-| plain text, `def` | **48µs** | 147µs |
-| JSON, `def` | **56µs** | 152µs |
-| typed params + validation, `def` | **67µs** | 163µs |
-| `Depends`, `def` | **62µs** | 159µs |
-| `async def` | 107µs | **115µs** |
+| plain text, `def` | **21µs** | 110µs |
+| JSON, `def` | **28µs** | 115µs |
+| typed params + validation, `def` | **38µs** | 126µs |
+| `Depends`, `def` | **35µs** | 127µs |
+| `async def` | 78µs | **75µs** |
 
-Read the diagonal. A synchronous handler is roughly **3× cheaper on WSGI**,
-because the fast path never touches an event loop. An async handler is cheapest
-on ASGI, because there is no thread hop back to a background loop.
+Read the diagonal. A synchronous handler is **3–5× cheaper on WSGI**, because
+the fast path never touches an event loop. An async handler is cheapest on
+ASGI, because there is no thread hop back to a background loop.
 
 The ASGI column for `def` handlers is dominated by `asyncio.to_thread` — the
 honest cost of running blocking code without stalling the loop. Every ASGI
 framework pays it. SlowAPI is the one that lets you stop paying it by changing
 a deployment command rather than a codebase.
 
-Framework overhead is rarely your bottleneck. The point of the table is not the
-absolute numbers; it is that the right protocol depends on your code, and here
-that is a decision you can defer and revisit.
+### Against FastAPI
+
+`make bench-vs` runs both frameworks on identical handlers through the raw ASGI
+protocol, with no test client involved, and compares their responses byte for
+byte before timing anything:
+
+| Route | FastAPI (ASGI) | SlowAPI (ASGI) | SlowAPI (WSGI) |
+| --- | ---: | ---: | ---: |
+| plain text | 154.1µs | 63.3µs | **17.8µs** |
+| JSON | 155.8µs | 68.7µs | **22.8µs** |
+| path + query validated | 175.5µs | 78.1µs | **32.8µs** |
+| `async def` JSON | **15.6µs** | 17.2µs | — |
+
+Read that as one result rather than four: **the gap is the thread hop, not the
+framework.** SlowAPI is 5–8× cheaper on synchronous routes because on WSGI it
+never makes the hop, not because its routing or validation is cleverer. Where no
+hop is involved, the two are level — FastAPI is ahead by about 8% on `async def`
+handlers, roughly what SlowAPI spends minting the request ID FastAPI does not.
+
+So the honest claim is narrow. Synchronous code deployed on WSGI is
+substantially cheaper here; asynchronous code is a wash, and you should be
+choosing on features and ecosystem, where FastAPI is far ahead.
+
+Framework overhead is rarely your bottleneck. A handler that opens a database
+connection has already spent more than every figure above. The point of the
+tables is not the absolute numbers; it is that the right protocol depends on
+your code, and here that is a decision you can defer and revisit.
 
 ---
 
