@@ -26,6 +26,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
@@ -43,6 +44,7 @@ wsgi = ["gunicorn>=22.0"]
 templates = ["jinja2>=3.1"]
 pydantic = ["pydantic>=2.7"]
 all = ["uvicorn[standard]>=0.30", "gunicorn>=22.0", "jinja2>=3.1", "pydantic>=2.7"]
+docs = ["mkdocs-material>=9.5"]
 dev = [
     "pytest>=8.2",
     "pytest-cov>=5.0",

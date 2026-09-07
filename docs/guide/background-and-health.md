@@ -49,7 +49,7 @@ one bad task cannot take the others with it.
 
 That is a deliberate trade. If a task must not be lost, it does not belong in a
 background task; it belongs in a durable queue. See
-[growth.md](../growth.md#what-is-deliberately-absent) for why the framework
+[growth.md](../growth.md#3-what-is-deliberately-absent) for why the framework
 does not ship one.
 
 ### Cost

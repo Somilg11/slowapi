@@ -57,8 +57,24 @@ check: lint typecheck validate test ## Everything CI runs
 bench: ## Compare the WSGI and ASGI paths
 	$(BIN)/python benchmarks/run.py
 
+.PHONY: bench-vs
+bench-vs: ## Compare against FastAPI on identical handlers
+	$(BIN)/pip install --quiet fastapi
+	$(BIN)/python benchmarks/compare.py
+
 .PHONY: docs
-docs: ## Regenerate the OpenAPI sample used in the docs
+docs: ## Build the documentation site (warnings are errors)
+	$(BIN)/pip install --quiet -e ".[docs]"
+	$(BIN)/mkdocs build --strict
+	@echo "Built: site/index.html"
+
+.PHONY: docs-serve
+docs-serve: ## Serve the documentation site with live reload
+	$(BIN)/pip install --quiet -e ".[docs]"
+	$(BIN)/mkdocs serve
+
+.PHONY: openapi
+openapi: ## Regenerate the OpenAPI sample used in the docs
 	$(BIN)/python -m slowapi openapi examples/rest-api/main:app -o docs/reference/openapi-sample.json
 
 .PHONY: build
@@ -68,7 +84,7 @@ build: ## Build the sdist and wheel
 
 .PHONY: clean
 clean: ## Remove caches and build artefacts
-	rm -rf build dist htmlcov .coverage .pytest_cache .mypy_cache .ruff_cache
+	rm -rf build dist site htmlcov .coverage .pytest_cache .mypy_cache .ruff_cache
 	find . -name '__pycache__' -type d -prune -exec rm -rf {} +
 	find . -name '*.egg-info' -type d -prune -exec rm -rf {} +
 

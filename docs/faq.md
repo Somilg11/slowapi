@@ -136,5 +136,5 @@ decide with that in front of you.
 
 ### How do I contribute?
 
-Read [CONTRIBUTING.md](../CONTRIBUTING.md). The short version: tests must run
+Read [CONTRIBUTING.md](https://github.com/Somilg11/slowapi/blob/master/CONTRIBUTING.md). The short version: tests must run
 on both protocols, and new required runtime dependencies are not accepted.

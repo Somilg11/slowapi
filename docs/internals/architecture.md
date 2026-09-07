@@ -141,7 +141,7 @@ See [Dual-protocol dispatch](dual-protocol.md). The short version:
 ## Design constraints
 
 Every change is measured against these. They are also the review checklist in
-[CONTRIBUTING.md](../../CONTRIBUTING.md).
+[CONTRIBUTING.md](https://github.com/Somilg11/slowapi/blob/master/CONTRIBUTING.md).
 
 1. **Protocol parity.** Behaviour must be identical on WSGI and ASGI.
 2. **Zero required dependencies.** Optional extras only.

@@ -1,0 +1,130 @@
+/* SlowAPI documentation theme.
+ *
+ * Two colours, used deliberately: teal is the framework, amber is the second
+ * protocol. They appear together in the logo and nowhere else by accident.
+ */
+
+:root,
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color:        #0f766e;
+  --md-primary-fg-color--light: #14b8a6;
+  --md-primary-fg-color--dark:  #115e59;
+  --md-primary-bg-color:        #ffffff;
+  --md-primary-bg-color--light: rgba(255, 255, 255, 0.7);
+
+  --md-accent-fg-color:             #b45309;
+  --md-accent-fg-color--transparent: rgba(180, 83, 9, 0.1);
+
+  --sa-hero-from: #0f766e;
+  --sa-hero-to:   #134e4a;
+  --sa-rule:      var(--md-default-fg-color--lightest);
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color:        #14b8a6;
+  --md-primary-fg-color--light: #5eead4;
+  --md-primary-fg-color--dark:  #0f766e;
+  --md-primary-bg-color:        #0b1220;
+  --md-primary-bg-color--light: rgba(11, 18, 32, 0.7);
+
+  --md-accent-fg-color:              #fbbf24;
+  --md-accent-fg-color--transparent: rgba(251, 191, 36, 0.12);
+
+  --md-hue: 214;
+
+  --sa-hero-from: #134e4a;
+  --sa-hero-to:   #0b1220;
+}
+
+/* The header is dark in both themes so the logo reads the same way. */
+.md-header {
+  background-color: #0b1220;
+  color: #ffffff;
+}
+.md-tabs {
+  background-color: #0b1220;
+}
+
+/* ---------------------------------------------------------------- hero */
+
+.sa-hero {
+  margin: 0 0 3rem;
+  padding: 3rem 2rem 2.75rem;
+  border-radius: 0.6rem;
+  background: linear-gradient(135deg, var(--sa-hero-from), var(--sa-hero-to));
+  color: #ffffff;
+  text-align: center;
+}
+
+.sa-hero h1 {
+  margin: 0;
+  font-size: 2.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.sa-hero .sa-tagline {
+  margin: 0.4rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #5eead4;
+}
+
+.sa-hero .sa-sub {
+  margin: 0.9rem auto 0;
+  max-width: 34rem;
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.sa-cta {
+  margin-top: 1.6rem;
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.sa-cta .md-button {
+  border-color: rgba(255, 255, 255, 0.45);
+  color: #ffffff;
+}
+
+.sa-cta .md-button--primary {
+  background-color: #ffffff;
+  border-color: #ffffff;
+  color: #0f766e;
+}
+
+.sa-cta .md-button:hover {
+  background-color: var(--md-accent-fg-color);
+  border-color: var(--md-accent-fg-color);
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------- misc */
+
+/* Numbers deserve to be scannable, not read left to right. */
+.sa-figure {
+  font-variant-numeric: tabular-nums;
+}
+
+.md-typeset .grid.cards > ul > li {
+  border-radius: 0.4rem;
+}
+
+.md-typeset table:not([class]) th {
+  background: var(--md-default-fg-color--lightest);
+}
+
+/* Long API tables should scroll inside themselves, never the page. */
+.md-typeset__table {
+  min-width: 0;
+}
+
+.md-typeset .sa-note {
+  font-size: 0.72rem;
+  color: var(--md-default-fg-color--light);
+}
