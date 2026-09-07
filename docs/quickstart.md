@@ -5,7 +5,7 @@ Ten minutes, one file, a working typed service that runs on two protocols.
 ## 1. A first handler
 
 ```bash
-pip install slowapi-framework
+pip install slowfw
 ```
 
 ```python

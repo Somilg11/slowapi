@@ -61,7 +61,7 @@ have to live with in year two.
 
     ---
 
-    `pip install slowapi-framework`. Nothing else is required — every
+    `pip install slowfw`. Nothing else is required — every
     dependency is an opt-in extra.
 
 -   :material-rocket-launch: **[Quickstart](quickstart.md)**

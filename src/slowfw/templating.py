@@ -180,7 +180,7 @@ class TemplateEngine:
             except ImportError as exc:  # pragma: no cover - optional path
                 raise ConfigurationError(
                     "engine='jinja2' requires jinja2. Install it with "
-                    "`pip install slowapi-framework[templates]`."
+                    "`pip install slowfw[templates]`."
                 ) from exc
             self._jinja = Environment(
                 loader=FileSystemLoader(self.directory),

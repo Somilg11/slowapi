@@ -109,7 +109,7 @@ app.configure_templates("templates", engine="jinja2")
 
 Every Jinja feature becomes available — macros, `{% extends %}` chains,
 `{% with %}`, the full filter library — and `res.render(...)` does not change.
-Requires `pip install "slowapi-framework[templates]"`.
+Requires `pip install "slowfw[templates]"`.
 
 Use the built-in engine when you want zero dependencies and the features above
 are enough. Use Jinja2 when you want macros, complex inheritance, or an

@@ -140,7 +140,7 @@ class _LoopThread:
     def __init__(self) -> None:
         self.loop = asyncio.new_event_loop()
         self._ready = threading.Event()
-        self._thread = threading.Thread(target=self._run, name="slowapi-loop", daemon=True)
+        self._thread = threading.Thread(target=self._run, name="slowfw-loop", daemon=True)
         self._thread.start()
         self._ready.wait()
 

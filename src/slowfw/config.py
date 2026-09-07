@@ -95,7 +95,7 @@ class Settings:
     """Framework-level settings.  Extend it for your own application config."""
 
     #: Free-form name used in logs and the OpenAPI title.
-    app_name: str = "slowapi-app"
+    app_name: str = "slowfw-app"
     environment: str = "development"
     debug: bool = False
     host: str = "127.0.0.1"

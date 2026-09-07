@@ -38,7 +38,7 @@ def encode_multipart(
     dependency here to test a zero-dependency framework would be a strange
     trade.  The wire format is small enough to own.
     """
-    boundary = "----slowapitestboundary7MA4YWxkTrZu0gW"
+    boundary = "----slowfwtestboundary7MA4YWxkTrZu0gW"
     parts: list[bytes] = []
 
     if isinstance(data, t.Mapping):

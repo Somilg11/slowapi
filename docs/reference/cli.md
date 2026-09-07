@@ -2,7 +2,7 @@
 
 ```bash
 python -m slowfw <command>      # always available
-slowapi <command>                # after installation, via the entry point
+slowfw <command>                # after installation, via the entry point
 ```
 
 ## `run`
@@ -10,9 +10,9 @@ slowapi <command>                # after installation, via the entry point
 Start a server.
 
 ```bash
-slowapi run main:app --reload
-slowapi run main:app --host 0.0.0.0 --port 8080 --workers 4 --json-logs
-slowapi run main:app --server gunicorn
+slowfw run main:app --reload
+slowfw run main:app --host 0.0.0.0 --port 8080 --workers 4 --json-logs
+slowfw run main:app --server gunicorn
 ```
 
 | Option | Default | Notes |
@@ -35,7 +35,7 @@ works in a virtualenv with nothing but SlowAPI installed.
 Print the route table. The fastest way to answer "why is this 404".
 
 ```bash
-$ slowapi routes main:app
+$ slowfw routes main:app
 METHOD   PATH                  NAME
 --------------------------------------------
 DELETE   /tasks/{task_id}      delete_task
@@ -56,7 +56,7 @@ that a route was not removed by accident.
 Analyse every route without starting a server.
 
 ```bash
-slowapi check main:app
+slowfw check main:app
 ```
 
 ```
@@ -84,7 +84,7 @@ startup, so a broken route already fails the process rather than the first
 request; `check` moves the discovery earlier still, to a red build.
 
 ```yaml
-- run: slowapi check main:app
+- run: slowfw check main:app
 ```
 
 Exit code `1` on failure, `0` on success.
@@ -94,14 +94,14 @@ Exit code `1` on failure, `0` on success.
 Dump the generated schema.
 
 ```bash
-slowapi openapi main:app                      # to stdout
-slowapi openapi main:app -o openapi.json      # to a file
+slowfw openapi main:app                      # to stdout
+slowfw openapi main:app -o openapi.json      # to a file
 ```
 
 Commit the output and diff it in CI to catch unintended API changes:
 
 ```bash
-slowapi openapi main:app -o /tmp/current.json
+slowfw openapi main:app -o /tmp/current.json
 diff <(jq -S . openapi.json) <(jq -S . /tmp/current.json)
 ```
 
@@ -110,10 +110,10 @@ diff <(jq -S . openapi.json) <(jq -S . /tmp/current.json)
 Generate a cryptographically strong key for `SECRET_KEY`.
 
 ```bash
-$ slowapi secret
+$ slowfw secret
 kPvNc7xQ2mYbF8dR3wLzJ5nT1hA6sE9uG4iO0pXvC2kM7bN3
 
-$ slowapi secret --bytes 64
+$ slowfw secret --bytes 64
 ```
 
 Uses `secrets.token_urlsafe`. Never reuse a key between environments, and never
@@ -124,8 +124,8 @@ commit one.
 Scaffold a project that is deployable on day one.
 
 ```bash
-slowapi new my-service
-slowapi new my-service --template modular
+slowfw new my-service
+slowfw new my-service --template modular
 ```
 
 Templates: `api` (default), `modular`, `fullstack`.

@@ -224,7 +224,7 @@ You do not have to move everything at once. SlowAPI is a WSGI application, so
 you can mount it beside an existing one and route by path at the proxy:
 
 ```nginx
-location /v2/ { proxy_pass http://slowapi-service; }
+location /v2/ { proxy_pass http://slowfw-service; }
 location /    { proxy_pass http://legacy-service;  }
 ```
 

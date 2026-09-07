@@ -40,7 +40,7 @@ def generate(app: SlowAPI) -> dict[str, t.Any]:
             "title": app.title,
             "version": app.version,
             "description": app.description or None,
-            "x-generator": f"slowapi {__version__}",
+            "x-generator": f"slowfw {__version__}",
         },
         "paths": paths,
     }
@@ -160,7 +160,7 @@ _DOC_STYLE = """
   <style>
     body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
     #swagger-ui, #redoc { min-height: 100vh; }
-    .slowapi-offline { padding: 3rem; max-width: 40rem; margin: 0 auto; line-height: 1.6; }
+    .slowfw-offline { padding: 3rem; max-width: 40rem; margin: 0 auto; line-height: 1.6; }
   </style>
 """
 
@@ -178,7 +178,7 @@ def swagger_html(openapi_url: str, title: str) -> str:
 </head>
 <body>
   <div id="swagger-ui"></div>
-  <noscript class="slowapi-offline">
+  <noscript class="slowfw-offline">
     This page renders the schema at <code>{openapi_url}</code> with Swagger UI, which is
     loaded from a CDN. In an air-gapped environment, fetch that URL directly or
     run <code>python -m slowfw openapi</code>.

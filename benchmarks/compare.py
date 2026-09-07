@@ -58,7 +58,7 @@ BATCH = 50
 # --------------------------------------------------------------- applications
 
 
-def build_slowapi() -> SlowAPI:
+def build_slowfw() -> SlowAPI:
     app = SlowAPI(docs_url=None, redoc_url=None, openapi_url=None)
 
     @app.get("/plain")
@@ -232,7 +232,7 @@ async def assert_identical(slow, fast) -> None:
             sys.exit(
                 f"{name}: responses differ, benchmark would be meaningless\n"
                 f"  fastapi -> {fast_status} {fast_body!r}\n"
-                f"  slowapi -> {slow_status} {slow_body!r}"
+                f"  slowfw  -> {slow_status} {slow_body!r}"
             )
         if has_wsgi:
             wsgi_status, wsgi_body = wsgi_call(slow, make_environ(path, query_text))
@@ -246,7 +246,7 @@ async def main() -> int:
     parser.add_argument("--json", action="store_true", help="emit machine-readable output")
     args = parser.parse_args()
 
-    slow = build_slowapi()
+    slow = build_slowfw()
     fast = build_fastapi()
     await slow.startup()
 
@@ -259,8 +259,8 @@ async def main() -> int:
                 {
                     "route": name,
                     "fastapi_asgi": await time_asgi(fast, path, query_bytes, args.iterations),
-                    "slowapi_asgi": await time_asgi(slow, path, query_bytes, args.iterations),
-                    "slowapi_wsgi": (
+                    "slowfw_asgi": await time_asgi(slow, path, query_bytes, args.iterations),
+                    "slowfw_wsgi": (
                         time_wsgi(slow, path, query_text, args.iterations) if has_wsgi else None
                     ),
                 }
@@ -276,19 +276,19 @@ async def main() -> int:
     print(header)
     print("-" * len(header))
     for row in rows:
-        wsgi = row["slowapi_wsgi"]
+        wsgi = row["slowfw_wsgi"]
         wsgi_text = f"{wsgi['p50_us']:.1f}us" if wsgi else "n/a"
         print(
             f"{row['route']:<24}"
             f"{row['fastapi_asgi']['p50_us']:>13.1f}us"
-            f"{row['slowapi_asgi']['p50_us']:>13.1f}us"
+            f"{row['slowfw_asgi']['p50_us']:>13.1f}us"
             f"{wsgi_text:>15}"
         )
 
     print("\nmedian per-request overhead; lower is better\n")
     for row in rows:
-        wsgi = row["slowapi_wsgi"]
-        best = (wsgi or row["slowapi_asgi"])["p50_us"]
+        wsgi = row["slowfw_wsgi"]
+        best = (wsgi or row["slowfw_asgi"])["p50_us"]
         protocol = "WSGI" if wsgi else "ASGI"
         ratio = row["fastapi_asgi"]["p50_us"] / best
         verb = "faster" if ratio >= 1 else "slower"

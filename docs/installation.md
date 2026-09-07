@@ -1,7 +1,7 @@
 # Installation
 
 ```bash
-pip install slowapi-framework
+pip install slowfw
 ```
 
 That is the whole runtime. SlowAPI has **zero required dependencies** — no
@@ -11,10 +11,10 @@ Pydantic, no Starlette, no `anyio`, no `click`. The import name is `slowfw`:
 from slowfw import SlowAPI
 ```
 
-> **On the names.** The PyPI name `slowapi` is taken by an unrelated
-> rate-limiting library for Starlette. This project publishes as
-> `slowapi-framework` and imports as `slowfw`, so the two can share an
-> environment without colliding. The command-line tool is still `slowapi`.
+> **On the name.** `slowapi` on PyPI is an unrelated rate-limiting library for
+> Starlette, which is why this project is not called that. `slowfw` is the
+> distribution, the import and the command, so the two can share an environment
+> without either noticing.
 
 ## Supported versions
 
@@ -33,12 +33,12 @@ Extras are opt-in on purpose: a dependency you did not ask for is a dependency
 you still have to patch.
 
 ```bash
-pip install "slowapi-framework[asgi]"       # uvicorn, for the ASGI path
-pip install "slowapi-framework[wsgi]"       # gunicorn, for the WSGI path
-pip install "slowapi-framework[templates]"  # jinja2, instead of the built-in engine
-pip install "slowapi-framework[pydantic]"   # pydantic models as DTOs
-pip install "slowapi-framework[all]"        # all of the above
-pip install "slowapi-framework[dev]"        # plus pytest, ruff, mypy
+pip install "slowfw[asgi]"       # uvicorn, for the ASGI path
+pip install "slowfw[wsgi]"       # gunicorn, for the WSGI path
+pip install "slowfw[templates]"  # jinja2, instead of the built-in engine
+pip install "slowfw[pydantic]"   # pydantic models as DTOs
+pip install "slowfw[all]"        # all of the above
+pip install "slowfw[dev]"        # plus pytest, ruff, mypy
 ```
 
 Nothing above changes how you write code. `app.run()` works with none of them
@@ -62,8 +62,8 @@ python -c "import slowfw; print(slowfw.__version__)"
 ## From source
 
 ```bash
-git clone https://github.com/Somilg11/slowapi
-cd slowapi
+git clone https://github.com/Somilg11/slowfw
+cd slowfw
 make install     # creates .venv and installs -e ".[dev,all]"
 make check       # lint, types, and the full test suite
 ```

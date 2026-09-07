@@ -3,7 +3,7 @@ requires = ["hatchling>=1.24"]
 build-backend = "hatchling.build"
 
 [project]
-name = "slowapi-framework"
+name = "slowfw"
 dynamic = ["version"]
 description = "One handler, two protocols. Express ergonomics, FastAPI typing, NestJS structure - on WSGI and ASGI at the same time."
 readme = "README.md"
@@ -57,14 +57,14 @@ dev = [
 ]
 
 [project.scripts]
-slowapi = "slowfw.__main__:main"
+slowfw = "slowfw.__main__:main"
 
 [project.urls]
-Homepage = "https://github.com/Somilg11/slowapi"
-Documentation = "https://github.com/Somilg11/slowapi/tree/master/docs"
-Source = "https://github.com/Somilg11/slowapi"
-Issues = "https://github.com/Somilg11/slowapi/issues"
-Changelog = "https://github.com/Somilg11/slowapi/blob/master/CHANGELOG.md"
+Homepage = "https://github.com/Somilg11/slowfw"
+Documentation = "https://github.com/Somilg11/slowfw/tree/master/docs"
+Source = "https://github.com/Somilg11/slowfw"
+Issues = "https://github.com/Somilg11/slowfw/issues"
+Changelog = "https://github.com/Somilg11/slowfw/blob/master/CHANGELOG.md"
 
 [tool.hatch.version]
 path = "src/slowfw/_version.py"

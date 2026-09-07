@@ -14,10 +14,9 @@ Measured on the WSGI fast path, a trivial handler costs about 48µs in-process
 and a typed, validated one about 67µs — competitive with any Python framework.
 The name is not a benchmark claim in either direction. Run `make bench`.
 
-Note that the PyPI name `slowapi` belongs to an unrelated rate-limiting library
-for Starlette. This project publishes as `slowapi-framework` and imports as
-`slowfw`, so both can be installed side by side. The command-line tool is still
-`slowapi`.
+Note that `slowapi` on PyPI is an unrelated rate-limiting library for Starlette.
+This project is `slowfw` throughout — distribution, import and command — so both
+can be installed side by side.
 
 ### Why not just use FastAPI?
 
@@ -116,7 +115,7 @@ Three ways: `res.status(201).json(...)`, `@app.post("/x", status_code=201)`, or
 
 ### Why is my route 404 when I expect it to match?
 
-Run `slowapi routes main:app` and look at the canonical paths. The usual causes
+Run `slowfw routes main:app` and look at the canonical paths. The usual causes
 are a converter that does not match (`/users/abc` against `{id:int}`), a
 missing prefix, or a `path` converter shadowing a later route.
 
@@ -137,5 +136,5 @@ decide with that in front of you.
 
 ### How do I contribute?
 
-Read [CONTRIBUTING.md](https://github.com/Somilg11/slowapi/blob/master/CONTRIBUTING.md). The short version: tests must run
+Read [CONTRIBUTING.md](https://github.com/Somilg11/slowfw/blob/master/CONTRIBUTING.md). The short version: tests must run
 on both protocols, and new required runtime dependencies are not accepted.

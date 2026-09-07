@@ -50,7 +50,7 @@ Read in this order the first time.
 
 | Page | What it covers |
 | --- | --- |
-| [CLI](reference/cli.md) | `slowapi run`, `routes`, `openapi`, `secret`, `new` |
+| [CLI](reference/cli.md) | `slowfw run`, `routes`, `openapi`, `secret`, `new` |
 | [API reference](reference/api.md) | Every public name, grouped |
 | [FAQ](faq.md) | Questions that come up repeatedly |
 

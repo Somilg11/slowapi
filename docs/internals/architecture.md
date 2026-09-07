@@ -32,7 +32,7 @@ src/slowfw/
 ├── config.py            # Settings, from_env, load_dotenv
 ├── server.py            # Development server selection
 ├── testing.py           # TestClient
-├── scaffold.py          # `slowapi new`
+├── scaffold.py          # `slowfw new`
 ├── __main__.py          # CLI
 ├── middleware/
 │   ├── base.py          # The onion, executors, middleware adaptation
@@ -141,7 +141,7 @@ See [Dual-protocol dispatch](dual-protocol.md). The short version:
 ## Design constraints
 
 Every change is measured against these. They are also the review checklist in
-[CONTRIBUTING.md](https://github.com/Somilg11/slowapi/blob/master/CONTRIBUTING.md).
+[CONTRIBUTING.md](https://github.com/Somilg11/slowfw/blob/master/CONTRIBUTING.md).
 
 1. **Protocol parity.** Behaviour must be identical on WSGI and ASGI.
 2. **Zero required dependencies.** Optional extras only.

@@ -1,7 +1,7 @@
 # hello
 
 ```bash
-pip install slowapi-framework
+pip install slowfw
 python -m slowfw run main:app
 ```
 

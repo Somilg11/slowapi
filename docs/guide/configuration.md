@@ -14,7 +14,7 @@ settings = Settings.load()          # reads .env, then the environment
 
 | Field | Environment variable | Default |
 | --- | --- | --- |
-| `app_name` | `APP_NAME` | `"slowapi-app"` |
+| `app_name` | `APP_NAME` | `"slowfw-app"` |
 | `environment` | `ENVIRONMENT` | `"development"` |
 | `debug` | `DEBUG` | `False` |
 | `host` | `HOST` | `"127.0.0.1"` |

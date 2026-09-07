@@ -6,13 +6,13 @@
 
 Express ergonomics · FastAPI typing · NestJS structure — on WSGI **and** ASGI, at the same time.
 
-[![CI](https://github.com/Somilg11/slowapi/actions/workflows/ci.yml/badge.svg)](https://github.com/Somilg11/slowapi/actions/workflows/ci.yml)
-[![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12%20|%203.13%20|%203.14-blue)](https://pypi.org/project/slowapi-framework/)
+[![CI](https://github.com/Somilg11/slowfw/actions/workflows/ci.yml/badge.svg)](https://github.com/Somilg11/slowfw/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12%20|%203.13%20|%203.14-blue)](https://pypi.org/project/slowfw/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Dependencies](https://img.shields.io/badge/runtime%20dependencies-0-brightgreen)](pyproject.toml)
-[![Docs](https://img.shields.io/badge/docs-somilg11.github.io%2Fslowapi-ffd400)](https://somilg11.github.io/slowapi/)
+[![Docs](https://img.shields.io/badge/docs-somilg11.github.io%2Fslowfw-ffd400)](https://somilg11.github.io/slowfw/)
 
-**[Documentation](https://somilg11.github.io/slowapi/)** · [Quickstart](docs/quickstart.md) · [Guide](docs/README.md) · [Why it exists](docs/growth.md) · [How it works](docs/internals/dual-protocol.md)
+**[Documentation](https://somilg11.github.io/slowfw/)** · [Quickstart](docs/quickstart.md) · [Guide](docs/README.md) · [Why it exists](docs/growth.md) · [How it works](docs/internals/dual-protocol.md)
 
 </div>
 
@@ -123,7 +123,7 @@ Every handler signature, `Depends` chain, guard, interceptor, pipe and injected
 provider is analysed before the process serves anything:
 
 ```bash
-$ slowapi check main:app
+$ slowfw check main:app
 FAIL  2 route(s) failed validation:
   GET /reports/{id} (get_report): Could not resolve type hints for 'get_report':
     name 'ReportService' is not defined.
@@ -242,23 +242,23 @@ leaves the process, and making it leak takes a deliberate act.
 ## Install
 
 ```bash
-pip install slowapi-framework
+pip install slowfw
 ```
 
 **Zero required runtime dependencies.** No Pydantic, no Starlette, no `anyio`,
 no `click`. Everything else is opt-in:
 
 ```bash
-pip install "slowapi-framework[asgi]"        # uvicorn
-pip install "slowapi-framework[wsgi]"        # gunicorn
-pip install "slowapi-framework[templates]"   # jinja2
-pip install "slowapi-framework[pydantic]"    # pydantic models as DTOs
-pip install "slowapi-framework[all]"
+pip install "slowfw[asgi]"        # uvicorn
+pip install "slowfw[wsgi]"        # gunicorn
+pip install "slowfw[templates]"   # jinja2
+pip install "slowfw[pydantic]"    # pydantic models as DTOs
+pip install "slowfw[all]"
 ```
 
-> The PyPI name `slowapi` belongs to an unrelated rate-limiting library. This
-> project publishes as **`slowapi-framework`**, imports as **`slowfw`**, and
-> installs a **`slowapi`** command — so the two can share an environment.
+> **On the name.** `slowapi` on PyPI is an unrelated rate-limiting library for
+> Starlette. This project is **`slowfw`** everywhere — the distribution, the
+> import, and the command — so the two never meet.
 
 ```bash
 python -m slowfw new my-service     # scaffold a deployable project
@@ -399,7 +399,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and the
 [invariants](docs/growth.md#2-the-invariants) they come from.
 
 ```bash
-git clone https://github.com/Somilg11/slowapi && cd slowapi
+git clone https://github.com/Somilg11/slowfw && cd slowfw
 make install
 make check        # lint, types, and the full suite
 ```

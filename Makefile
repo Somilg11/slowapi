@@ -90,7 +90,7 @@ clean: ## Remove caches and build artefacts
 
 .PHONY: docker
 docker: ## Build the runtime image
-	docker build -t slowapi/example-api:dev .
+	docker build -t slowfw/example-api:dev .
 
 .PHONY: up
 up: ## Start the local stack

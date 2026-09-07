@@ -31,7 +31,7 @@ assert a.status_code == b.status_code and a.content == b.content
 The core installs with nothing, and CI proves it on every commit. If your
 feature needs a library:
 
-- Put it in `slowapi/contrib/` behind an optional extra, import it lazily, and
+- Put it in `slowfw/contrib/` behind an optional extra, import it lazily, and
   raise a clear error when it is missing; **or**
 - Implement the capability with the standard library; **or**
 - Make the case in an issue first. It has to be a strong one.
@@ -39,7 +39,7 @@ feature needs a library:
 ## Getting set up
 
 ```bash
-git clone https://github.com/Somilg11/slowapi && cd slowapi
+git clone https://github.com/Somilg11/slowfw && cd slowfw
 make install          # .venv with -e ".[dev,all]"
 make check            # lint + types + tests, exactly what CI runs
 ```

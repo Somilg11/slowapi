@@ -407,7 +407,7 @@ class SlowAPI:
         are cached, so this doubles as warming the dispatch plans.
 
         Called for you by :meth:`startup`.  Call it directly -- or run
-        ``slowapi check`` -- to fail a build instead of a deploy.
+        ``slowfw check`` -- to fail a build instead of a deploy.
         """
         problems: list[str] = []
         for route in self.router.routes:

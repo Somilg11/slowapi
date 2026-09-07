@@ -1,4 +1,4 @@
-"""``slowapi new`` -- generate a project that is deployable on day one.
+"""``slowfw new`` -- generate a project that is deployable on day one.
 
 The templates are intentionally small.  Every file exists because leaving it
 out is a decision someone would otherwise have to make under time pressure:
@@ -86,7 +86,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \\
 CMD ["python", "-m", "slowfw", "run", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 """
 
-_REQUIREMENTS = """slowapi-framework
+_REQUIREMENTS = """slowfw
 uvicorn[standard]>=0.30
 """
 

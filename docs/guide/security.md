@@ -133,4 +133,4 @@ app.use(
 
 ## Reporting a vulnerability
 
-Please do not open a public issue. See [SECURITY.md](https://github.com/Somilg11/slowapi/blob/master/SECURITY.md).
+Please do not open a public issue. See [SECURITY.md](https://github.com/Somilg11/slowfw/blob/master/SECURITY.md).
