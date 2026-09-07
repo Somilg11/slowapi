@@ -85,11 +85,11 @@ class TimeoutMiddleware:
         if not self.per_path:
             return self.seconds
         app = getattr(request, "app", None)
-        router = getattr(app, "router", None)
-        if router is None:
+        matcher = getattr(app, "match_request", None)
+        if matcher is None:
             return self.seconds
         try:
-            route, _ = router.match(request.method, request.path)
+            route, _ = matcher(request)
         except Exception:
             # No route, or the wrong method.  The 404/405 is not ours to raise;
             # let the chain reach the handler that does.

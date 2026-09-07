@@ -1,10 +1,6 @@
-# Default owners for everything.
-*                           @slowapi/maintainers
-
-# The dual-protocol core is the part most easily broken by an innocent change.
-/src/slowapi/adapters/      @slowapi/core
-/src/slowapi/concurrency.py @slowapi/core
-/src/slowapi/app.py         @slowapi/core
-
-/.github/workflows/         @slowapi/maintainers
-/docs/                      @slowapi/docs
+# One maintainer, so one rule. Per-path owners belong here the moment there is
+# more than one person to route a review to -- the dual-protocol core
+# (src/slowapi/adapters/, concurrency.py, app.py) is the part that will want
+# its own reviewer first, because it is the part most easily broken by an
+# innocent-looking change.
+*   @Somilg11

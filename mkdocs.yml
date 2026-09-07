@@ -1,0 +1,144 @@
+site_name: SlowAPI
+site_description: One handler. Two protocols. A Python web framework that is a WSGI application and an ASGI application at the same time.
+site_url: https://somilg11.github.io/slowapi/
+site_author: Somil Gupta
+
+repo_url: https://github.com/Somilg11/slowapi
+repo_name: Somilg11/slowapi
+edit_uri: edit/master/docs/
+
+copyright: Released under the MIT licence.
+
+docs_dir: docs
+site_dir: site
+
+# Every warning is an error in CI: a broken internal link or an orphaned page
+# is a docs bug, and docs bugs are the ones nobody files an issue about.
+strict: true
+
+# docs/README.md is the index GitHub renders when you browse the folder. The
+# site has its own landing page, so the README is built but kept out of the nav
+# rather than duplicated into it.
+exclude_docs: |
+  README.md
+
+theme:
+  name: material
+  language: en
+  favicon: assets/favicon.svg
+  logo: assets/logo.svg
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Follow the system theme
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light
+  font:
+    text: Inter
+    code: JetBrains Mono
+  features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - content.action.edit
+
+extra_css:
+  - assets/slowapi.css
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Somilg11/slowapi
+      name: SlowAPI on GitHub
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/slowapi-framework/
+      name: slowapi-framework on PyPI
+
+plugins:
+  - search
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      permalink_title: Link to this section
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+nav:
+  - Home: index.md
+  - Getting started:
+      - Installation: installation.md
+      - Quickstart: quickstart.md
+      - Migrating: migration.md
+  - Guide:
+      - Routing: guide/routing.md
+      - Requests: guide/requests.md
+      - Responses: guide/responses.md
+      - Validation: guide/validation.md
+      - Middleware: guide/middleware.md
+      - Dependency injection: guide/dependency-injection.md
+      - Controllers and modules: guide/controllers-modules.md
+      - Guards, interceptors, pipes: guide/guards-interceptors-pipes.md
+      - Serialization: guide/serialization.md
+      - Templates and static files: guide/templates-static.md
+      - Errors: guide/errors.md
+      - Configuration: guide/configuration.md
+      - Background, health, deadlines: guide/background-and-health.md
+      - Testing: guide/testing.md
+      - Security: guide/security.md
+      - Deployment: guide/deployment.md
+  - Internals:
+      - Dual-protocol dispatch: internals/dual-protocol.md
+      - Architecture: internals/architecture.md
+  - Reference:
+      - CLI: reference/cli.md
+      - API: reference/api.md
+      - FAQ: faq.md
+  - Project:
+      - Why it exists: growth.md
+      - Changelog: https://github.com/Somilg11/slowapi/blob/master/CHANGELOG.md
+      - Contributing: https://github.com/Somilg11/slowapi/blob/master/CONTRIBUTING.md
+      - Security policy: https://github.com/Somilg11/slowapi/blob/master/SECURITY.md

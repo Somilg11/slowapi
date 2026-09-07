@@ -4,7 +4,7 @@ Why SlowAPI exists, what it is deliberately not, and where it goes next.
 
 This document is opinionated on purpose. A roadmap that lists only features is
 a wish list; one that states the constraints those features must satisfy is a
-plan. Everything below is subject to the [invariants](#the-invariants), which
+plan. Everything below is subject to the [invariants](#2-the-invariants), which
 are not.
 
 ---
@@ -486,11 +486,11 @@ Not stars, and not benchmark position.
 
 The roadmap is a proposal, not a contract. Concrete arguments beat votes.
 
-- Open a [discussion](https://github.com/slowapi/slowapi/discussions) for
+- Open a [discussion](https://github.com/Somilg11/slowapi/discussions) for
   direction.
-- Open an [issue](https://github.com/slowapi/slowapi/issues) for a specific
+- Open an [issue](https://github.com/Somilg11/slowapi/issues) for a specific
   proposal, and describe the situation you are in rather than the API you want.
-- Read [CONTRIBUTING.md](../CONTRIBUTING.md) before opening a pull request.
+- Read [CONTRIBUTING.md](https://github.com/Somilg11/slowapi/blob/master/CONTRIBUTING.md) before opening a pull request.
 
 The most valuable contribution is not a feature. It is a report of the shape
 *"I tried to do X and the framework made it hard, and here is what I did

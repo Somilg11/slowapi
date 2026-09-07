@@ -177,7 +177,7 @@ class WSGIAdapter:
     def _choose_executor(self, request: Request) -> bool:
         """Return True when this request can take the loop-free fast path."""
         try:
-            route, _ = self.app.router.match(request.method, request.path)
+            route, _ = self.app.match_request(request)
         except HTTPException:
             # No route matched, so only middleware will run.  The framework's
             # own middleware is `async def` but never actually suspends, which

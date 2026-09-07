@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- A documentation site, built from the same Markdown the repository already
+  contained, at <https://somilg11.github.io/slowapi/>. `make docs-serve` runs it
+  locally. The build is `--strict`, so a broken link, a dead anchor or an
+  orphaned page fails rather than ships -- which immediately found two dead
+  anchors and four links that resolved when browsing the repository but not on
+  the published site.
+- `benchmarks/compare.py`, measuring SlowAPI against FastAPI on identical
+  handlers through the raw ASGI protocol. It compares both frameworks' output
+  byte for byte before timing anything, and refuses to print numbers if they
+  disagree.
+- Python 3.14 is now tested in CI and declared in the package metadata.
+
 - `Annotated[T, Query(...)]` and friends. The marker lives in the type, so a
   marked parameter no longer has to sit after every unmarked one and the
   default slot stays free for an actual default. Works for `Query`, `Path`,
@@ -91,6 +103,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `(req, exc, res)` and `(req, res, exc)` both work. The old positional rule
   contradicted the `(req, res)` order used everywhere else and getting it
   backwards produced an `AttributeError` from inside error handling.
+
+### Performance
+
+- Middleware shape -- its arity and whether it is asynchronous -- is now
+  computed once per middleware instead of once per request. `adapt()` was
+  calling `inspect.signature()` on every middleware on every request, which
+  profiling put at a third of the per-request cost of an otherwise empty async
+  pipeline. Route matching is likewise memoised on the request scope, keyed on
+  the method and path that produced it so middleware that rewrites either one
+  still re-matches correctly. Median per-request overhead falls from 44.9µs to
+  17.4µs on WSGI and from 42.6µs to 17.4µs for an async handler on ASGI.
 
 ### Changed
 
@@ -198,5 +221,5 @@ the Express `(req, res, next)` contract.
   methods, `functools.partial`, and callable objects.
 - No `Content-Length` was ever set.
 
-[Unreleased]: https://github.com/slowapi/slowapi/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/slowapi/slowapi/releases/tag/v0.1.0
+[Unreleased]: https://github.com/Somilg11/slowapi/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/Somilg11/slowapi/releases/tag/v0.1.0

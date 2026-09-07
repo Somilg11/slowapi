@@ -39,7 +39,7 @@ feature needs a library:
 ## Getting set up
 
 ```bash
-git clone https://github.com/slowapi/slowapi && cd slowapi
+git clone https://github.com/Somilg11/slowapi && cd slowapi
 make install          # .venv with -e ".[dev,all]"
 make check            # lint + types + tests, exactly what CI runs
 ```

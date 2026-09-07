@@ -2,76 +2,76 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
   workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Superseded pull request runs are wasted minutes. Pushes to master are the
+  # historical record, so those are never cancelled.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
 
+env:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
 jobs:
-  lint:
-    name: Lint and types
+  changes:
+    name: What changed
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.detect.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: detect
+        name: Decide whether the cross-platform matrix is worth running
+        env:
+          BASE: >-
+            ${{ github.event_name == 'pull_request'
+                && github.event.pull_request.base.sha
+                || github.event.before }}
+        run: |
+          set -euo pipefail
+          # An unknown base (first push, force push, manual dispatch) means we
+          # cannot prove the change is documentation-only, so assume it is not.
+          if [ -z "${BASE}" ] || [ "${BASE}" = "0000000000000000000000000000000000000000" ]; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            echo "base unknown: running everything"
+            exit 0
+          fi
+          changed=$(git diff --name-only "${BASE}" HEAD)
+          echo "changed files:"; echo "${changed}"
+          if printf '%s\n' "${changed}" | grep -qvE '^(docs/|[^/]*\.md$|LICENSE$)'; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+            echo "documentation only: skipping the cross-platform matrix"
+          fi
+
+  # One runner that fails fast on everything cheap to check. Nothing expensive
+  # starts until this is green, so a typo costs one runner rather than eight.
+  quick:
+    name: Lint, types, docs, tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
-      - run: pip install -e ".[dev]"
-      - run: ruff check src tests examples benchmarks scripts
-      - run: ruff format --check src tests
-      - run: mypy
-      # Broken doc links are a slow leak nobody files an issue about.
-      - run: python scripts/check_docs_links.py
+          # Without this, setup-python looks for requirements.txt, finds none,
+          # and silently caches nothing on every job in the workflow.
+          cache-dependency-path: pyproject.toml
 
-  test:
-    name: Test ${{ matrix.python }} on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python: ["3.10", "3.11", "3.12", "3.13"]
-        exclude:
-          # Keep the matrix affordable; the oldest and newest cover the range.
-          - os: macos-latest
-            python: "3.11"
-          - os: macos-latest
-            python: "3.12"
-          - os: windows-latest
-            python: "3.11"
-          - os: windows-latest
-            python: "3.12"
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python }}
-          cache: pip
-      - run: pip install -e ".[dev,all]"
-      - run: pytest --cov --cov-report=xml
-      - name: Upload coverage
-        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.12'
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage
-          path: coverage.xml
-
-  zero-deps:
-    name: Import with no optional dependencies
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      # The zero-dependency promise is only real if CI proves it every commit.
+      # The zero-dependency promise has to be tested before dev extras land,
+      # because afterwards the environment can no longer disprove it.
       - run: pip install .
       - run: python -c "import slowapi; print(slowapi.__version__)"
       - run: python -m slowapi --version
@@ -84,16 +84,14 @@ jobs:
           print("zero required runtime dependencies: confirmed")
           EOF
 
-  validate:
-    name: Scaffold, validate and serve
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
       - run: pip install -e ".[dev,all]"
+      - run: ruff check src tests examples benchmarks scripts
+      - run: ruff format --check src tests
+      - run: mypy
+      # Broken doc links are a slow leak nobody files an issue about.
+      - run: python scripts/check_docs_links.py
+      - run: pytest --cov --cov-report=xml
+
       # `slowapi check` analyses every route without starting a server, which is
       # what makes a broken dependency a red build instead of a rolled-back deploy.
       - name: Every example passes route validation
@@ -108,15 +106,76 @@ jobs:
           python -m slowapi new smoke-svc --template api
           cd smoke-svc && python -m pytest -q
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.xml
+          retention-days: 7
+
+  # Everything `quick` already covered on 3.12/Linux is deliberately absent.
+  # `fail-fast` stays off: the point of a matrix is to learn *which* versions
+  # break, and this project has already shipped a bug that existed on four of
+  # five supported versions and was invisible on the fifth.
+  matrix:
+    name: Test ${{ matrix.python }} on ${{ matrix.os }}
+    needs: [changes, quick]
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, python: "3.10" }
+          - { os: ubuntu-latest, python: "3.11" }
+          - { os: ubuntu-latest, python: "3.13" }
+          - { os: ubuntu-latest, python: "3.14" }
+          # Windows bills at 2x and is the only platform whose path handling
+          # and signal semantics genuinely differ. One version is enough.
+          - { os: windows-latest, python: "3.13" }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: pip install -e ".[dev,all]"
+      - run: pytest -q
+
+  # macOS bills at 10x. Two macOS jobs used to cost more than the rest of the
+  # workflow combined, to test a pure-Python package on a platform that differs
+  # from Linux in nothing this framework touches. It now runs when master moves,
+  # not on every pull request.
+  macos:
+    name: Test 3.13 on macos
+    needs: [changes, quick]
+    if: needs.changes.outputs.code == 'true' && github.event_name != 'pull_request'
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: pip install -e ".[dev,all]"
+      - run: pytest -q
+
   build:
     name: Build distributions
+    needs: [changes, quick, matrix]
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
-    needs: [lint, test]
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
       - run: pip install build twine
       - run: python -m build
       - run: twine check dist/*
@@ -124,3 +183,4 @@ jobs:
         with:
           name: dist
           path: dist/
+          retention-days: 7
