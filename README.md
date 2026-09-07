@@ -10,7 +10,7 @@ Express ergonomics · FastAPI typing · NestJS structure — on WSGI **and** ASG
 [![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12%20|%203.13%20|%203.14-blue)](https://pypi.org/project/slowapi-framework/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Dependencies](https://img.shields.io/badge/runtime%20dependencies-0-brightgreen)](pyproject.toml)
-[![Docs](https://img.shields.io/badge/docs-somilg11.github.io%2Fslowapi-000000)](https://somilg11.github.io/slowapi/)
+[![Docs](https://img.shields.io/badge/docs-somilg11.github.io%2Fslowapi-ffd400)](https://somilg11.github.io/slowapi/)
 
 **[Documentation](https://somilg11.github.io/slowapi/)** · [Quickstart](docs/quickstart.md) · [Guide](docs/README.md) · [Why it exists](docs/growth.md) · [How it works](docs/internals/dual-protocol.md)
 

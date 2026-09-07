@@ -1,9 +1,18 @@
 /* SlowAPI documentation theme.
  *
- * Monochrome on purpose. There is no brand colour, so weight, size and one
- * grey scale carry the whole hierarchy -- which means contrast has to be
- * deliberate rather than decorative. Light is black on white, dark is white on
- * black, and nothing in between is tinted.
+ * Three values: black, white, and one yellow. Light is black on white, dark is
+ * white on black, and the grey scale between them is untinted -- so hierarchy
+ * is carried by weight and size, and yellow is spent only where it means
+ * something.
+ *
+ * One rule governs the yellow, and it is not a matter of taste. #ffd400 scores
+ * 14.67:1 against black and 1.43:1 against white, so:
+ *
+ *   yellow is a SURFACE in light mode -- a button ground, a mark, a rule, a
+ *   selection -- and never text on white;
+ *   black is the text that sits ON yellow, in both themes.
+ *
+ * Anything that breaks that rule is unreadable rather than merely ugly.
  */
 
 /* ------------------------------------------------------------- palette */
@@ -16,6 +25,8 @@
   --sa-border:    #eaeaea;
   --sa-muted:     #666666;  /* secondary text, 5.74:1 on white */
   --sa-faint:     #767676;  /* tertiary text, 4.54:1 -- still AA for body */
+  --sa-yellow:    #ffd400;  /* 14.67:1 against black, 1.43:1 against white */
+  --sa-on-yellow: #000000;
 
   --md-default-bg-color:            var(--sa-bg);
   --md-default-fg-color:            var(--sa-fg);
@@ -37,6 +48,7 @@
   --md-typeset-a-color:             var(--sa-fg);
   --md-code-bg-color:               var(--sa-subtle);
   --md-code-fg-color:               var(--sa-fg);
+  --md-typeset-mark-color:          var(--sa-yellow);
 
   --md-footer-bg-color:             var(--sa-bg);
   --md-footer-bg-color--dark:       var(--sa-bg);
@@ -52,6 +64,8 @@
   --sa-border:    #2e2e2e;
   --sa-muted:     #a1a1a1;  /* 8.13:1 on black */
   --sa-faint:     #7d7d7d;  /* 5.10:1 on black */
+  --sa-yellow:    #ffd400;  /* the one value that does not change between themes */
+  --sa-on-yellow: #000000;
 
   --md-default-bg-color:            var(--sa-bg);
   --md-default-fg-color:            var(--sa-fg);
@@ -72,6 +86,7 @@
   --md-typeset-a-color:             var(--sa-fg);
   --md-code-bg-color:               var(--sa-subtle);
   --md-code-fg-color:               var(--sa-fg);
+  --md-typeset-mark-color:          var(--sa-yellow);
 
   --md-footer-bg-color:             var(--sa-bg);
   --md-footer-bg-color--dark:       var(--sa-bg);
@@ -156,16 +171,20 @@
 }
 
 /* Links earn their underline instead of a colour. */
+/* Links keep full-contrast text and spend the yellow on the underline, which
+ * has no contrast requirement of its own. */
 .md-typeset a {
   text-decoration: underline;
-  text-decoration-color: var(--sa-border);
+  text-decoration-color: var(--sa-yellow);
+  text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
-  transition: text-decoration-color 120ms;
+  transition: text-decoration-thickness 120ms;
 }
 
 .md-typeset a:hover,
 .md-typeset a:focus {
-  text-decoration-color: currentcolor;
+  text-decoration-color: var(--sa-yellow);
+  text-decoration-thickness: 2px;
 }
 
 /* Navigation and headerlinks are not prose links; leave them undecorated. */
@@ -182,12 +201,35 @@
   font-weight: 600;
 }
 
+/* Where you are, marked by the accent rather than by a colour the text would
+ * have to survive. */
+.md-nav--secondary .md-nav__link--active,
+.md-sidebar--primary .md-nav__item--active > .md-nav__link {
+  box-shadow: inset 2px 0 0 var(--sa-yellow);
+  padding-left: 0.5rem;
+}
+
+.md-progress {
+  background-color: var(--sa-yellow);
+}
+
+::selection {
+  background-color: var(--sa-yellow);
+  color: var(--sa-on-yellow);
+}
+
+.md-typeset mark,
+.md-search-result mark {
+  background-color: var(--sa-yellow);
+  color: var(--sa-on-yellow);
+}
+
 /* ----------------------------------------------------------------- hero */
 
 .sa-hero {
   margin: 0 0 3.5rem;
   padding: 2rem 0 2.5rem;
-  border-bottom: 1px solid var(--sa-border);
+  border-bottom: 2px solid var(--sa-yellow);
 }
 
 .md-typeset .sa-hero h1 {
@@ -240,17 +282,23 @@
   color: var(--sa-fg);
 }
 
-/* The one inverted element on the page, so it is unmistakably the way in. */
+/* The only saturated element on the page, so it is unmistakably the way in.
+ * Black on yellow reads at 14.67:1 in either theme. */
 .md-typeset .sa-cta .md-button--primary {
-  background-color: var(--sa-fg);
-  border-color: var(--sa-fg);
-  color: var(--sa-bg);
+  background-color: var(--sa-yellow);
+  border-color: var(--sa-yellow);
+  color: var(--sa-on-yellow);
+  font-weight: 600;
 }
 
 .md-typeset .sa-cta .md-button--primary:hover {
-  background-color: var(--sa-muted);
-  border-color: var(--sa-muted);
-  color: var(--sa-bg);
+  background-color: var(--sa-yellow);
+  border-color: var(--sa-on-yellow);
+  color: var(--sa-on-yellow);
+}
+
+.md-typeset .sa-cta .md-button:not(.md-button--primary):hover {
+  box-shadow: inset 0 -2px 0 var(--sa-yellow);
 }
 
 /* ---------------------------------------------------------------- blocks */
@@ -307,7 +355,7 @@
 .md-typeset .admonition,
 .md-typeset details {
   border: 1px solid var(--sa-border);
-  border-left-width: 1px;
+  border-left: 3px solid var(--sa-yellow);
   border-radius: 8px;
   box-shadow: none;
   font-size: 0.72rem;
