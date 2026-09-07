@@ -486,9 +486,9 @@ Not stars, and not benchmark position.
 
 The roadmap is a proposal, not a contract. Concrete arguments beat votes.
 
-- Open a [discussion](https://github.com/slowapi/slowapi/discussions) for
+- Open a [discussion](https://github.com/Somilg11/slowapi/discussions) for
   direction.
-- Open an [issue](https://github.com/slowapi/slowapi/issues) for a specific
+- Open an [issue](https://github.com/Somilg11/slowapi/issues) for a specific
   proposal, and describe the situation you are in rather than the API you want.
 - Read [CONTRIBUTING.md](../CONTRIBUTING.md) before opening a pull request.
 

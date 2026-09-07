@@ -6,7 +6,7 @@
 
 Express ergonomics · FastAPI typing · NestJS structure — on WSGI **and** ASGI, at the same time.
 
-[![CI](https://github.com/slowapi/slowapi/actions/workflows/ci.yml/badge.svg)](https://github.com/slowapi/slowapi/actions/workflows/ci.yml)
+[![CI](https://github.com/Somilg11/slowapi/actions/workflows/ci.yml/badge.svg)](https://github.com/Somilg11/slowapi/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12%20|%203.13-blue)](https://pypi.org/project/slowapi-framework/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Dependencies](https://img.shields.io/badge/runtime%20dependencies-0-brightgreen)](pyproject.toml)
@@ -372,7 +372,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and the
 [invariants](docs/growth.md#2-the-invariants) they come from.
 
 ```bash
-git clone https://github.com/slowapi/slowapi && cd slowapi
+git clone https://github.com/Somilg11/slowapi && cd slowapi
 make install
 make check        # lint, types, and the full suite
 ```

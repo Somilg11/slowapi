@@ -58,11 +58,11 @@ dev = [
 slowapi = "slowapi.__main__:main"
 
 [project.urls]
-Homepage = "https://github.com/slowapi/slowapi"
-Documentation = "https://github.com/slowapi/slowapi/tree/main/docs"
-Source = "https://github.com/slowapi/slowapi"
-Issues = "https://github.com/slowapi/slowapi/issues"
-Changelog = "https://github.com/slowapi/slowapi/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/Somilg11/slowapi"
+Documentation = "https://github.com/Somilg11/slowapi/tree/master/docs"
+Source = "https://github.com/Somilg11/slowapi"
+Issues = "https://github.com/Somilg11/slowapi/issues"
+Changelog = "https://github.com/Somilg11/slowapi/blob/master/CHANGELOG.md"
 
 [tool.hatch.version]
 path = "src/slowapi/_version.py"

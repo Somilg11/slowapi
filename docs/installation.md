@@ -62,7 +62,7 @@ python -c "import slowapi; print(slowapi.__version__)"
 ## From source
 
 ```bash
-git clone https://github.com/slowapi/slowapi
+git clone https://github.com/Somilg11/slowapi
 cd slowapi
 make install     # creates .venv and installs -e ".[dev,all]"
 make check       # lint, types, and the full test suite

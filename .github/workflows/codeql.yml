@@ -2,11 +2,21 @@ name: CodeQL
 
 on:
   push:
-    branches: [main]
+    branches: [master]
+    # CodeQL only analyses Python here, so a change that touches no Python is
+    # a scan whose result is known in advance.
+    paths: ["**.py", ".github/workflows/codeql.yml"]
   pull_request:
-    branches: [main]
+    branches: [master]
+    paths: ["**.py", ".github/workflows/codeql.yml"]
   schedule:
+    # Weekly, so a newly published query still finds old code.
     - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -14,11 +24,15 @@ permissions:
 
 jobs:
   analyse:
+    name: Analyse Python
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: github/codeql-action/init@v3
         with:
           languages: python
-          queries: security-and-quality
+          # `security-extended` rather than `security-and-quality`: the quality
+          # half duplicates ruff and mypy, which already run on every commit.
+          queries: security-extended
       - uses: github/codeql-action/analyze@v3

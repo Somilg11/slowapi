@@ -198,5 +198,5 @@ the Express `(req, res, next)` contract.
   methods, `functools.partial`, and callable objects.
 - No `Content-Length` was ever set.
 
-[Unreleased]: https://github.com/slowapi/slowapi/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/slowapi/slowapi/releases/tag/v0.1.0
+[Unreleased]: https://github.com/Somilg11/slowapi/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/Somilg11/slowapi/releases/tag/v0.1.0
